@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 
-import "./Home.css"
+import "./Home.scss"
 
 /*
 model Benevole {
