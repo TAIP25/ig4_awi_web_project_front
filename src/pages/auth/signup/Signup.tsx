@@ -2,43 +2,173 @@ import "./Signup.scss";
 
 
 
-function Signup() {
+import * as React from 'react';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import axios from 'axios';
 
 
-    return (
-        <div className="form-container">
-            <form className="form">
-                <h1 className="form-title">Signup</h1>
-                <div className="form-group">
-                    <label htmlFor="nom">Nom</label>
-                    <input className="form-control" type="nom" id="nom" name="nom" placeholder="Nom de famille" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="prenom">Prénom</label>
-                    <input className="form-control" type="prenom" id="prenom" name="prenom" placeholder="Prénom" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input className="form-control" type="email" id="email" name="email" placeholder="Email" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="pseudo">Pseudo</label>
-                    <input className="form-control" type="pseudo" id="pseudo" name="pseudo" placeholder="Pseudo" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input className="form-control" type="password" id="password" name="password" placeholder="Password" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password-confirm">Confirm password</label>
-                    <input className="form-control" type="password" id="password-confirm" name="password-confirm" placeholder="Confirm password" />
-                </div>
-                
-                <button className="btn btn-primary" type="submit">Signup</button>
-                
-            </form> 
-        </div>
-    )
+
+// TODO remove, this demo shouldn't need to reset the theme.
+const defaultTheme = createTheme();
+
+export default function SignUp() {
+  
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    console.log({
+      email: data.get('email'),
+      password: data.get('password'),
+    });
+
+    //Vérification des champs vide
+    if(data.get('email') === "" || data.get('password') === "" || 
+      data.get('nom') === "" || data.get('prenom') === "" || 
+      data.get('pseudo') === "" || data.get('checkPassword') === "")
+      {
+      alert("Veuillez remplir tout les champs");
+      return;
+    }
+
+    //Vérification du mot de passe
+    if(data.get('password') !== data.get('checkPassword'))
+    {
+      alert("Les mots de passe ne sont pas identiques");
+      return;
+    }
+
+    axios.post(`${import.meta.env.VITE_API_URL}/benevoles/`, {
+      email: data.get('email'),
+      password: data.get('password'),
+      nom: data.get('nom'),
+      prenom: data.get('prenom'),
+      pseudo: data.get('pseudo'),
+    }).then((response) => {
+      console.log(response);
+      alert("Inscription réussie");
+    }).catch((error) => {
+      console.log(error);
+      alert(error.response.data.error);
+    });
+  };
+
+  return (
+    <ThemeProvider theme={defaultTheme}>
+      <Container component="main" maxWidth="sm">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign up
+          </Typography>
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  autoComplete="given-name"
+                  name="prenom"
+                  required
+                  fullWidth
+                  id="firstName"
+                  label="Prénom"
+                  autoFocus
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="nom"
+                  label="Nom"
+                  name="nom"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email"
+                  name="email"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="pseudo"
+                  label="Pseudo"
+                  name="pseudo"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  name="password"
+                  label="Mot de passe"
+                  type="password"
+                  id="password"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  name="checkPassword"
+                  label="Confirmer mot de passe"
+                  type="password"
+                  id="checkPassword"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={<Checkbox value="allowExtraEmails" color="primary" />}
+                  required
+                  label="J'accepte de recevoir des mails pour m'informer des disponibilités"
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign Up
+            </Button>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="#" variant="body2">
+                  Déjà membre? Connectez vous
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
+  );
 }
-
-export default Signup;
