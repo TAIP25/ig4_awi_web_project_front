@@ -7,7 +7,6 @@ import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -20,11 +19,16 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
-import { mainListItems, secondaryListItems } from './listItems';
+import ListItems from './ListItems.tsx';
 import Chart from './Chart';
 import Overview from './Overview';
 import Benevoles from './Benevoles';
 import Benevole from '../../interfaces/Benevole';
+//import BenevolesBIS from './BenevolesBIS.tsx';
+
+// TODO remove, this demo shouldn't need to reset the theme.
+// TODO fix BenevolesBIS.tsx and refactor this file to use it instead of Benevoles.tsx
+
 
 function Copyright(props: any) {
   return (
@@ -97,6 +101,11 @@ export default function Dashboard() {
   /* UseState */
   const [benevoles, setBenevoles] = useState<Benevole[]>([])
   const [open, setOpen] = React.useState(true);
+  const [onlyBenevoles, setOnlyBenevoles] = React.useState(false)
+  
+  const handleOnlyBenevoles: React.Dispatch<React.SetStateAction<boolean>> = (value) => {
+    setOnlyBenevoles(value)
+  }
 
   /* UseEffect */
   useEffect(() => {
@@ -162,11 +171,7 @@ export default function Dashboard() {
             </IconButton>
           </Toolbar>
           <Divider />
-          <List component="nav">
-            {mainListItems}
-            <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
-          </List>
+          <ListItems setOnlyBenevoles={handleOnlyBenevoles} />
         </Drawer>
         <Box
           component="main"
@@ -184,7 +189,7 @@ export default function Dashboard() {
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
               {/* Chart */}
-              <Grid item xs={12} md={8} lg={9}>
+              { !onlyBenevoles && <Grid item xs={12} md={8} lg={9}>
                 <Paper
                   sx={{
                     p: 2,
@@ -195,9 +200,9 @@ export default function Dashboard() {
                 >
                   <Chart benevoles={benevoles} />
                 </Paper>
-              </Grid>
+              </Grid> }
               {/* Recent Deposits */}
-              <Grid item xs={12} md={4} lg={3}>
+              { !onlyBenevoles && <Grid item xs={12} md={4} lg={3}>
                 <Paper
                   sx={{
                     p: 2,
@@ -208,14 +213,18 @@ export default function Dashboard() {
                 >
                   <Overview benevoles={benevoles} />
                 </Paper>
-              </Grid>
+              </Grid> }
               {/* Recent Orders */}
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Benevoles benevoles={benevoles} />
+                  {/*onlyBenevoles ? 
+                  <BenevolesBIS benevoles={benevoles} /> : 
+                  <Benevoles benevoles={benevoles} onlyBenevoles={onlyBenevoles} />*/}
+                  <Benevoles benevoles={benevoles} onlyBenevoles={onlyBenevoles} />
                 </Paper>
               </Grid>
             </Grid>
+            <h1>{"" + onlyBenevoles}</h1>
             <Copyright sx={{ pt: 4 }} />
           </Container>
         </Box>
