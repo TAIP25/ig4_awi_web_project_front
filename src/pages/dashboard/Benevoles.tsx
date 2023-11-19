@@ -4,6 +4,7 @@ import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody
 
 import Title from './Title';
 import Benevole from '../../interfaces/Benevole';
+import { useLocation } from 'react-router-dom';
 
 interface Column {
   id: 'pseudo' | 'name' | 'email' | 'date';
@@ -26,13 +27,15 @@ const columns: readonly Column[] = [
   },
 ];
 
-  interface BenevolesProps {
-    benevoles: Benevole[];
-    onlyBenevoles: boolean;
-  }
+interface BenevolesProps {
+  benevoles: Benevole[];
+}
 
-  export default function Benevoles({benevoles, onlyBenevoles}: BenevolesProps) {
-    
+export default function Benevoles({benevoles}: BenevolesProps) {
+  
+  /* Hooks */
+  const location = useLocation();
+
   /* UseState */
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -48,7 +51,7 @@ const columns: readonly Column[] = [
   
   return (
     <Fragment>
-      <Title>{onlyBenevoles ? 'Benevoles' : 'Inscription récente'}</Title>
+      <Title>{ location.pathname === '/dashboard/benevoles' ? 'Benevoles' : 'Inscription récente' }</Title>
         <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>

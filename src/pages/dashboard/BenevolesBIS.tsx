@@ -19,11 +19,11 @@ const columns: GridColDef[] = [
   },
 ];
 
-  interface BenevolesProps {
-    benevoles: Benevole[];
-  }
+interface BenevolesProps {
+  benevoles: Benevole[];
+}
 
-  export default function BenevolesBIS({benevoles}: BenevolesProps) {
+export default function BenevolesBIS({benevoles}: BenevolesProps) {
   
   return (
     <Fragment>
