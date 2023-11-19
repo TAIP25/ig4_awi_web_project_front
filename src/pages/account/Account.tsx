@@ -1,9 +1,7 @@
-import { Box, Typography } from "@mui/material"
-import "./Home.scss"
+import { Box, Typography } from "@mui/material";
 
-export default function Home(){
-
-  return(
+export default function Account() {
+  return (
     <Box
     component="main"
     sx={{
@@ -27,8 +25,8 @@ export default function Home(){
         width: '100%',
       }}
       >
-        Accueil
+        Account
       </Typography>
     </Box>
-  )
+  );
 }
