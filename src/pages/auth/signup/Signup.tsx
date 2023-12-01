@@ -17,22 +17,72 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
+const tailleTShirt = [
+  {
+    value: 'XS',
+    label: 'XS',
+  },
+  {
+    value: 'S',
+    label: 'S',
+  },
+  {
+    value: 'M',
+    label: 'M',
+  },
+  {
+    value: 'L',
+    label: 'L',
+  },
+  {
+    value: 'XL',
+    label: 'XL',
+  },
+  {
+    value: 'XXL',
+    label: 'XXL',
+  },
+];
 
-
+const hebergement = [
+  {
+    value: 'Recherche',
+    label: 'Recherche',
+  },
+  {
+    value: 'Proposition',
+    label: 'Proposition',
+  },
+];
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignUp() {
+
+  const [checked, setChecked] = React.useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  
+  const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked((prev) => !prev);
+    console.log(checked);
+  };
+
   
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault(); 
+
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+
+    console.log(data.get('tailleTShirt'));
+    console.log(data.get('hebergement'));
 
     //Vérification des champs vide
     if(data.get('email') === "" || data.get('password') === "" || 
@@ -50,20 +100,30 @@ export default function SignUp() {
       return;
     }
 
+
     axios.post(`${import.meta.env.VITE_API_URL}/benevoles/`, {
       email: data.get('email'),
       password: data.get('password'),
       nom: data.get('nom'),
       prenom: data.get('prenom'),
       pseudo: data.get('pseudo'),
+      tailleTShirt: data.get('tailleTShirt'),
+      hebergement: data.get('hebergement'),
+      vegetarien: checked,
     }).then((response) => {
       console.log(response);
       alert("Inscription réussie");
+      setIsSignUp(true);
     }).catch((error) => {
       console.log(error);
       alert(error.response.data.error);
     });
   };
+
+  if(isSignUp)
+  {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -127,6 +187,44 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
+                  select
+                  SelectProps={{
+                    native: true,
+                  }}
+                  name="tailleTShirt"
+                  label="Taille T-shirt"
+                  id="tailleTShirt"
+                >
+                  {tailleTShirt.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  select
+                  SelectProps={{
+                    native: true,
+                  }}
+                  name="hebergement"
+                  label="Hebergement"
+                  id="hebergement"
+                >
+                  {hebergement.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
                   name="password"
                   label="Mot de passe"
                   type="password"
@@ -145,7 +243,23 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
+                  control={
+                  <Checkbox 
+                    value="vegetarien" 
+                    color="primary"
+                    onChange={handleChecked} 
+                    checked={checked}
+                    />}
+                  required
+                  label="Je suis végétarien"
+                />
+              
+                <FormControlLabel
+                  control={
+                  <Checkbox 
+                    value="allowExtraEmails" 
+                    color="primary"
+                     />}
                   required
                   label="J'accepte de recevoir des mails pour m'informer des disponibilités"
                 />
@@ -157,12 +271,12 @@ export default function SignUp() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign Up
+              S'inscrire
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
-                  Déjà membre? Connectez vous
+                <Link href="/login" variant="body2">
+                  Vous avez déjà un compte ? Connectez-vous
                 </Link>
               </Grid>
             </Grid>
