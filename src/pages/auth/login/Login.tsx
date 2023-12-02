@@ -16,6 +16,8 @@ import axios from 'axios';
 import {decodeToken} from 'react-jwt';
 import Cookies from 'js-cookie';
 import { useState, useEffect, useContext} from 'react';
+import AuthContext from '../../../context/AuthProvider';
+import { Navigate } from "react-router-dom";
 
 
 
@@ -24,6 +26,8 @@ import { useState, useEffect, useContext} from 'react';
 const defaultTheme = createTheme();
 
 export default function Login() {
+
+  const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
     
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,6 +48,7 @@ export default function Login() {
         Cookies.set('token', token, {expires: 1, secure: true});
         Cookies.set('id_member', id_benevole, {expires: 1, secure: true});
         console.log("Utilisateur connecté !");
+        setIsAuthenticated(true);
         console.log("Token : " + token);
         console.log("Id : " + id_benevole);
       
@@ -51,6 +56,12 @@ export default function Login() {
         console.log(error);
     });
   };
+
+  if (isAuthenticated) {
+    return (
+      <Navigate to="/" />
+    )
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -110,7 +121,7 @@ export default function Login() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/signup" variant="body2">
                   {"Pas de compte ? Inscrivez-vous"}
                 </Link>
               </Grid>

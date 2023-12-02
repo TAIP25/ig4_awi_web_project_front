@@ -12,6 +12,10 @@ import LoginIcon from '@mui/icons-material/Login';
 import React from "react";
 import MuiDrawer from '@mui/material/Drawer';
 import { drawerWidth } from "../App";
+import AuthContext from "../context/AuthProvider";
+import { useContext, useEffect } from "react";
+import Cookies from 'js-cookie';
+
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -45,7 +49,22 @@ interface SidebarProps {
 }
 
 export default function Sidebar({open, toggleDrawer}: SidebarProps) {
+  const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
   
+  const handleLogout = () => {
+    Cookies.remove('token');
+    Cookies.remove('id_member');
+    setIsAuthenticated(false);
+  }
+
+  useEffect(() => {
+    if (Cookies.get('token') != null) {
+      setIsAuthenticated(true);
+    }
+
+  }, [isAuthenticated]);
+
+
   // Contain: Accueil, Profile, Planning, Logout
   const mainListItems = (
     <React.Fragment>
@@ -122,7 +141,7 @@ export default function Sidebar({open, toggleDrawer}: SidebarProps) {
 
   const logoutButton = (
     <React.Fragment>
-      <ListItemButton>
+      <ListItemButton onClick={handleLogout}>
         <ListItemIcon>
           <LogoutIcon color="error" />
         </ListItemIcon>
@@ -169,16 +188,25 @@ export default function Sidebar({open, toggleDrawer}: SidebarProps) {
       </Toolbar>
       <Divider />
       <List component="nav">
-        {loginButton}
-        {registerButton}
-        {logoutButton}
-        <Divider sx={{ my: 1 }} />
-        {mainListItems}
-        <Divider sx={{ my: 1 }} />
-        {dashboardListItems}
-        <Divider sx={{ my: 1 }} />
-        {publipostageListItems}
-        <Divider sx={{ my: 1 }} />
+        { 
+          isAuthenticated ?
+          <>
+          {logoutButton}
+          <Divider sx={{ my: 1 }} />
+          {mainListItems}
+          <Divider sx={{ my: 1 }} />
+          {dashboardListItems}
+          <Divider sx={{ my: 1 }} />
+          {publipostageListItems}
+          <Divider sx={{ my: 1 }} />
+          </>
+          :
+          <>
+          {loginButton}
+          {registerButton}
+          </>
+        }
+        
         
       </List>
     </Drawer>

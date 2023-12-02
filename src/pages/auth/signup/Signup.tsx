@@ -62,7 +62,7 @@ const defaultTheme = createTheme();
 
 export default function SignUp() {
 
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   
   const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
