@@ -101,7 +101,7 @@ export default function SignUp() {
     }
 
 
-    axios.post(`${import.meta.env.VITE_API_URL}/benevoles/`, {
+    axios.post(`${import.meta.env.VITE_API_URL}/benevole/`, {
       email: data.get('email'),
       password: data.get('password'),
       nom: data.get('nom'),
@@ -116,7 +116,7 @@ export default function SignUp() {
       setIsSignUp(true);
     }).catch((error) => {
       console.log(error);
-      alert(error.response.data.error);
+      alert(error);
     });
   };
 

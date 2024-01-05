@@ -37,7 +37,7 @@ export default function Login() {
         alert("Veuillez remplir tous les champs");
     }
 
-    axios.post(`${import.meta.env.VITE_API_URL}/benevoles/login/`, {
+    axios.post(`${import.meta.env.VITE_API_URL}/benevole/login/`, {
         email: data.get('email'),
         password: data.get('password'),
     }).then((response) => {
