@@ -39,8 +39,6 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
-        {/* <Header namePage="Accueil" toggleDrawer={toggleDrawer} open={open} />
-        <Sidebar toggleDrawer={toggleDrawer} open={open} /> */}
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
