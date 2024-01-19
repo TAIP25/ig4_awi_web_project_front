@@ -11,7 +11,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import React from "react";
 import MuiDrawer from '@mui/material/Drawer';
-import { drawerWidth } from "../App";
+import  drawerWidth  from "../App";
 import AuthContext from "../context/AuthProvider";
 import { useContext, useEffect } from "react";
 import Cookies from 'js-cookie';
