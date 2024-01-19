@@ -3,12 +3,10 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 /* MUI */
-import { Box, ThemeProvider, createTheme, styled } from "@mui/material";
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import { Box, ThemeProvider, createTheme } from "@mui/material";
 
 /* Structure */
-import Header from "./pageStructure/Header"
-import Sidebar from "./pageStructure/Sidebar";
+import Navbar from "./pageStructure/Navbar";
 
 /* Pages */
 import Home from "./pages/home/Home";
@@ -17,48 +15,33 @@ import Signup from "./pages/auth/signup/Signup";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Account from "./pages/account/Account";
 import Planning from "./pages/planning/Planning";
+import { Palette } from "@mui/icons-material";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export const drawerWidth: number = 200;
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#556cd6',
+    },
+    secondary: {
+      main: '#19857b',
+    },
+  }
+});
 
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-}
 
-export const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
 
 export default function App() {
 
-  /* UseState */
-	const [open, setOpen] = React.useState(true);
-	
-	const toggleDrawer = () => {
-    setOpen(!open);
-  };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
-        <Header namePage="Accueil" toggleDrawer={toggleDrawer} open={open} />
-        <Sidebar toggleDrawer={toggleDrawer} open={open} />
+        {/* <Header namePage="Accueil" toggleDrawer={toggleDrawer} open={open} />
+        <Sidebar toggleDrawer={toggleDrawer} open={open} /> */}
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
