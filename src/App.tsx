@@ -49,6 +49,7 @@ export default function App() {
 
   /* UseState */
 	const [open, setOpen] = React.useState(true);
+  const [namePage, _setNamePage] = React.useState("Accueil");
 	
 	const toggleDrawer = () => {
     setOpen(!open);
@@ -57,7 +58,7 @@ export default function App() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }}>
-        <Header namePage="Accueil" toggleDrawer={toggleDrawer} open={open} />
+        <Header namePage={namePage} toggleDrawer={toggleDrawer} open={open} />
         <Sidebar toggleDrawer={toggleDrawer} open={open} />
         <Routes>
           <Route path="/" element={<Home />} />
