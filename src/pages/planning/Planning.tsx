@@ -18,10 +18,11 @@ export default function Planning() {
   const [creneauxHoraires, setCreneauxHoraires] = useState<CreneauHoraire[]>([]);
   const [postes, setPostes] = useState<Poste[]>([]);
   const [inscriptionBenevole, setInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
+  //TODO: handle myInscriptionBenevole
+  const [myInscriptionBenevole, setMyInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
   const [jour, setJour] = useState<string>("Samedi");
 
   /* UseEffect */
-  // TODO: Dont work
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,30 +33,61 @@ export default function Planning() {
         ]);
   
         const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
+        
         const postes: Poste[] = res2.data.poste;
-  
-        setCreneauxHoraires(creneauxHoraires);
-        setPostes(postes);
-  
+
         const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
-          return {
-            creneauxHorairesID: inscription.creneauHoraireID,
+          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+          const inscriptionBenevole: InscriptionBenevole = {
+            creneauHoraireID: inscription.creneauHoraireID,
             posteID: inscription.posteID,
             nombreInscrits: inscription._count.id,
-            nombreMax: postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles,
+            nombreMax: nombreMax,
           };
+          return inscriptionBenevole;
         });
 
+        setCreneauxHoraires(creneauxHoraires);
+        setPostes(postes);
         setInscriptionBenevole(inscriptionBenevoleTemp);
-
-        console.log(inscriptionBenevole)
       } catch (error) {
         console.error(error);
       }
     };
   
     fetchData();
-  }, [jour]);
+  }, []);
+
+  // use effect to update progress bars when inscriptionBenevole is updated
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const benevoleID: number = getCookiesBenevoleID();
+        const [res1, res2] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`),
+          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/benevole/${benevoleID}`),
+        ]);
+
+        const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+          const inscriptionBenevole: InscriptionBenevole = {
+            creneauHoraireID: inscription.creneauHoraireID,
+            posteID: inscription.posteID,
+            nombreInscrits: inscription._count.id,
+            nombreMax: nombreMax,
+          };
+          return inscriptionBenevole;
+        });
+        if(inscriptionBenevoleTemp !== inscriptionBenevole) {
+          setInscriptionBenevole(inscriptionBenevoleTemp);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    fetchData();
+  }, [inscriptionBenevole]);
 
   /* Functions */
   function getCreneauHoraireByDay(day: string) {
@@ -65,7 +97,6 @@ export default function Planning() {
   function getCookiesBenevoleID() {
     const decodedToken: any = decodeToken(Cookies.get('token')!)
     const benevoleID: number = decodedToken.id_benevole
-    console.log("Benevole ID: " + benevoleID)
     return benevoleID
   }
 
@@ -74,31 +105,44 @@ export default function Planning() {
     handleReservation(creneauHoraire, poste, festivalID, getCookiesBenevoleID())
   }
 
-  function handleReservation(creneauHoraire: CreneauHoraire, poste: Poste, festival: number, benevole: number) {
-    console.log("Handle reservation")
-    axios.post(`${import.meta.env.VITE_API_URL}/inscriptionBenevole`, {
-      benevoleID: benevole,
-      festivalID: festival,
-      creneauHoraireID: creneauHoraire.id,
-      posteID: poste.id,
-    }).then((response) => {
-      console.log(response);
-    }).catch((error) => {
-      console.log(error);
-    });
+  async function handleReservation(creneauHoraire: CreneauHoraire, poste: Poste, festival: number, benevole: number) {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/inscriptionBenevole`, {
+        benevoleID: benevole,
+        festivalID: festival,
+        creneauHoraireID: creneauHoraire.id,
+        posteID: poste.id,
+      })
+
+      if(res.status === 200) {
+        const countRes = await axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`)
+        
+        const inscriptionBenevoleTemp: InscriptionBenevole[] = countRes.data.inscription.map((inscription: any) => {
+          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+          const inscriptionBenevole: InscriptionBenevole = {
+            creneauHoraireID: inscription.creneauHoraireID,
+            posteID: inscription.posteID,
+            nombreInscrits: inscription._count.id,
+            nombreMax: nombreMax,
+          };
+          return inscriptionBenevole;
+        });
+        setInscriptionBenevole(inscriptionBenevoleTemp);
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  // TODO: Dont work
   function handleProgressBars(poste: Poste, creneauHoraire: CreneauHoraire) {
     const inscriptionBenevoleSpe: InscriptionBenevole | undefined = inscriptionBenevole.find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
-    console.log(inscriptionBenevoleSpe)
     if(inscriptionBenevoleSpe === undefined) {
       return 0
     } else {
       const nombreInscrits: number = inscriptionBenevoleSpe.nombreInscrits || 0
       const nombreMax: number = inscriptionBenevoleSpe.nombreMax || 1
       const progress: number = Math.floor((nombreInscrits / nombreMax) * 100)
-      console.log("Progress: " + progress)
 
       return progress
     }
