@@ -67,7 +67,11 @@ function ResponsiveAppBar() {
 
   return (
     
-    <AppBar color='secondary'>
+    <AppBar color='secondary'
+     sx={{
+      position: 'static',
+     }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <img src="/vectoriel/logo_FDJ_FINAL.jpg" alt="logo" width="80px" height="47px" />
@@ -197,11 +201,6 @@ function ResponsiveAppBar() {
             >
               {isAuthenticated ? (
                 [
-                  <MenuItem key="profile" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a" href="/account">
-                      Profile
-                    </Typography>
-                  </MenuItem>,
                   <MenuItem key="account" onClick={handleCloseUserMenu}>
                     <Typography textAlign="center" component="a" href="/account">
                       Account
@@ -229,11 +228,9 @@ function ResponsiveAppBar() {
               )}
             </Menu>
           </Box>
-
         </Toolbar>
       </Container>
     </AppBar>
-    
   );
 }
 export default ResponsiveAppBar;

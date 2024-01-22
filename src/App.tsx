@@ -23,10 +23,17 @@ const defaultTheme = createTheme();
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#556cd6',
+      main: '#739600',
+      light: '#92D400',
+      dark: '#55601C',
     },
     secondary: {
-      main: '#19857b',
+      main: '#4C5CC5',
+      light: '#9DABE2',
+      dark: '#002663',
+    },
+    error: {
+      main: '#FF0000',
     },
   }
 });
@@ -38,8 +45,11 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex' }}>
-        <Navbar />
+      <Box sx={{ 
+        display: "flex",
+        flexWrap: "wrap",
+        }}>
+        <Navbar/>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
