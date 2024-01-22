@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AuthContext from "../context/AuthProvider";
 import { useContext, useEffect } from "react";
+import { Navigate} from "react-router-dom";
 import Cookies from 'js-cookie';
 
 
@@ -56,6 +57,8 @@ function ResponsiveAppBar() {
     Cookies.remove('token');
     Cookies.remove('id_member');
     setIsAuthenticated(false);
+
+    return <Navigate to="/login" />;
   }
 
   useEffect(() => {
