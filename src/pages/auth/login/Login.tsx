@@ -44,6 +44,7 @@ export default function Login() {
         console.log(response);
         const {token} = response.data;
         const decodedToken : any = decodeToken(token);
+        console.log(decodedToken);
         const id_benevole = decodedToken.id_benevole;
         Cookies.set('token', token, {expires: 1, secure: true});
         Cookies.set('id_member', id_benevole, {expires: 1, secure: true});
