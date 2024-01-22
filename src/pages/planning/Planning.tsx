@@ -8,6 +8,7 @@ import Poste from "../../interfaces/Poste";
 import { decodeToken } from "react-jwt";
 import InscriptionBenevole from "../../interfaces/InscriptionBenevole";
 
+//TODO: refactor code and file
 export default function Planning() {
   /* Variables */
   //TODO: handle festivalID
@@ -20,6 +21,7 @@ export default function Planning() {
   const [jour, setJour] = useState<string>("Samedi");
 
   /* UseEffect */
+  // TODO: Dont work
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -86,6 +88,7 @@ export default function Planning() {
     });
   }
 
+  // TODO: Dont work
   function handleProgressBars(poste: Poste, creneauHoraire: CreneauHoraire) {
     const inscriptionBenevoleSpe: InscriptionBenevole | undefined = inscriptionBenevole.find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
     console.log(inscriptionBenevoleSpe)
