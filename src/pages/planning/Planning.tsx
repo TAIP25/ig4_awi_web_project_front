@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import CreneauHoraire from "../../interfaces/CreneauHoraire";
 import Poste from "../../interfaces/Poste";
 import { decodeToken } from "react-jwt";
+import InscriptionBenevole from "../../interfaces/InscriptionBenevole";
 
 export default function Planning() {
   /* Variables */
@@ -15,33 +16,44 @@ export default function Planning() {
   /* UseState */
   const [creneauxHoraires, setCreneauxHoraires] = useState<CreneauHoraire[]>([]);
   const [postes, setPostes] = useState<Poste[]>([]);
+  const [inscriptionBenevole, setInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
   const [jour, setJour] = useState<string>("Samedi");
 
   /* UseEffect */
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire/`, undefined)
-    .then(response => {
-      setCreneauxHoraires(response.data.creneauHoraire)
-    })
-    const req1 = axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`, undefined)
-    const req2 = axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festivalID}`, undefined)
-    
-    axios.all([req1, req2])
-    .then(axios.spread((...responses) => {
-      // Merge responses
-      const res1 = responses[0]
-      const res2 = responses[1]
-      // TODO: In progress
-      const postes: Poste[] = res2.data.poste.map((poste: Poste) => {
-        const nombreBenevolesActuel = res1.data.inscription.filter((inscription: any) => inscription.posteID === poste.id)._count
-        poste.nombreBenevolesActuel = nombreBenevolesActuel ? nombreBenevolesActuel : 0
-        return poste
-      })
-      console.log(postes)
-      //setPostes(postes)
-    }))
-    
-  }, [])
+    const fetchData = async () => {
+      try {
+        const [res1, res2, res3] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`),
+          axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festivalID}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire`),
+        ]);
+  
+        const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
+        const postes: Poste[] = res2.data.poste;
+  
+        setCreneauxHoraires(creneauxHoraires);
+        setPostes(postes);
+  
+        const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+          return {
+            creneauxHorairesID: inscription.creneauHoraireID,
+            posteID: inscription.posteID,
+            nombreInscrits: inscription._count.id,
+            nombreMax: postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles,
+          };
+        });
+
+        setInscriptionBenevole(inscriptionBenevoleTemp);
+
+        console.log(inscriptionBenevole)
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    fetchData();
+  }, [jour]);
 
   /* Functions */
   function getCreneauHoraireByDay(day: string) {
@@ -61,6 +73,7 @@ export default function Planning() {
   }
 
   function handleReservation(creneauHoraire: CreneauHoraire, poste: Poste, festival: number, benevole: number) {
+    console.log("Handle reservation")
     axios.post(`${import.meta.env.VITE_API_URL}/inscriptionBenevole`, {
       benevoleID: benevole,
       festivalID: festival,
@@ -71,6 +84,21 @@ export default function Planning() {
     }).catch((error) => {
       console.log(error);
     });
+  }
+
+  function handleProgressBars(poste: Poste, creneauHoraire: CreneauHoraire) {
+    const inscriptionBenevoleSpe: InscriptionBenevole | undefined = inscriptionBenevole.find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
+    console.log(inscriptionBenevoleSpe)
+    if(inscriptionBenevoleSpe === undefined) {
+      return 0
+    } else {
+      const nombreInscrits: number = inscriptionBenevoleSpe.nombreInscrits || 0
+      const nombreMax: number = inscriptionBenevoleSpe.nombreMax || 1
+      const progress: number = Math.floor((nombreInscrits / nombreMax) * 100)
+      console.log("Progress: " + progress)
+
+      return progress
+    }
   }
 
   return (
@@ -133,7 +161,7 @@ export default function Planning() {
                 <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
                   {poste.nom}
                 </Typography>
-              </Paper>   
+              </Paper>
               {getCreneauHoraireByDay(jour)
               .map((creneauHoraire) => (
                 <Paper key={creneauHoraire.id} sx={{ margin: 'auto', flexGrow: 1, width: "100%"}}>
@@ -143,7 +171,7 @@ export default function Planning() {
                         Réserver
                       </Typography>
                       <Box sx={{ width: '100%' }}>
-                        <LinearProgress variant="determinate" value={Math.floor(Math.random() * 100)} color="warning" />
+                        <LinearProgress variant="determinate" value={handleProgressBars(poste, creneauHoraire)} color="warning" />
                       </Box>
                     </Stack>
                   </Button>

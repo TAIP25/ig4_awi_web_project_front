@@ -4,7 +4,6 @@ export default interface Poste {
     nom: string,
     description: string,
     nombreBenevoles: number,
-    nombreBenevolesActuel: number,
     createdAt: Date,
     updatedAt: Date
 }
