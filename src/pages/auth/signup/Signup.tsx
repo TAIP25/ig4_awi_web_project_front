@@ -19,58 +19,15 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-const tailleTShirt = [
-  {
-    value: 'XS',
-    label: 'XS',
-  },
-  {
-    value: 'S',
-    label: 'S',
-  },
-  {
-    value: 'M',
-    label: 'M',
-  },
-  {
-    value: 'L',
-    label: 'L',
-  },
-  {
-    value: 'XL',
-    label: 'XL',
-  },
-  {
-    value: 'XXL',
-    label: 'XXL',
-  },
-];
 
-const hebergement = [
-  {
-    value: 'Recherche',
-    label: 'Recherche',
-  },
-  {
-    value: 'Proposition',
-    label: 'Proposition',
-  },
-];
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignUp() {
 
-  const [checked, setChecked] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  
-  const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked((prev) => !prev);
-    console.log(checked);
-  };
-
-  
+   
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
@@ -107,9 +64,6 @@ export default function SignUp() {
       nom: data.get('nom'),
       prenom: data.get('prenom'),
       pseudo: data.get('pseudo'),
-      tailleTShirt: data.get('tailleTShirt'),
-      hebergement: data.get('hebergement'),
-      vegetarien: checked,
     }).then((response) => {
       console.log(response);
       alert("Inscription réussie");
@@ -141,7 +95,7 @@ export default function SignUp() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Inscrivez-vous
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -187,44 +141,6 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
-                  select
-                  SelectProps={{
-                    native: true,
-                  }}
-                  name="tailleTShirt"
-                  label="Taille T-shirt"
-                  id="tailleTShirt"
-                >
-                  {tailleTShirt.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  select
-                  SelectProps={{
-                    native: true,
-                  }}
-                  name="hebergement"
-                  label="Hebergement"
-                  id="hebergement"
-                >
-                  {hebergement.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
                   name="password"
                   label="Mot de passe"
                   type="password"
@@ -241,19 +157,7 @@ export default function SignUp() {
                   id="checkPassword"
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                  <Checkbox 
-                    value="vegetarien" 
-                    color="primary"
-                    onChange={handleChecked} 
-                    checked={checked}
-                    />}
-                  required
-                  label="Je suis végétarien"
-                />
-              
+              <Grid item xs={12}>   
                 <FormControlLabel
                   control={
                   <Checkbox 
