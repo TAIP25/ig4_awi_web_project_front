@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AuthContext from "../context/AuthProvider";
 import { useContext, useEffect } from "react";
+import { Navigate} from "react-router-dom";
 import Cookies from 'js-cookie';
 
 
@@ -56,6 +57,8 @@ function ResponsiveAppBar() {
     Cookies.remove('token');
     Cookies.remove('id_member');
     setIsAuthenticated(false);
+
+    return <Navigate to="/login" />;
   }
 
   useEffect(() => {
@@ -66,8 +69,11 @@ function ResponsiveAppBar() {
   }, [isAuthenticated]);
 
   return (
-    
-    <AppBar color='secondary' position="static">
+    <AppBar color='secondary'
+     sx={{
+      position: 'static',
+     }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <img src="/vectoriel/logo_FDJ_FINAL.jpg" alt="logo" width="80px" height="47px" />
@@ -197,11 +203,6 @@ function ResponsiveAppBar() {
             >
               {isAuthenticated ? (
                 [
-                  <MenuItem key="profile" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a" href="/account">
-                      Profile
-                    </Typography>
-                  </MenuItem>,
                   <MenuItem key="account" onClick={handleCloseUserMenu}>
                     <Typography textAlign="center" component="a" href="/account">
                       Account
@@ -229,11 +230,9 @@ function ResponsiveAppBar() {
               )}
             </Menu>
           </Box>
-
         </Toolbar>
       </Container>
     </AppBar>
-    
   );
 }
 export default ResponsiveAppBar;
