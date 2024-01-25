@@ -69,7 +69,6 @@ function ResponsiveAppBar() {
   }, [isAuthenticated]);
 
   return (
-    
     <AppBar color='secondary'
      sx={{
       position: 'static',

@@ -1,21 +1,10 @@
-import { Box, Typography } from "@mui/material"
-import "./Home.scss"
+import { Typography } from "@mui/material"
+//import "./Home.scss"
 
 export default function Home(){
 
   return(
-    <Box
-    component="main"
-    sx={{
-      backgroundColor: (theme) =>
-        theme.palette.mode === 'light'
-          ? theme.palette.grey[100]
-          : theme.palette.grey[900],
-      flexGrow: 1,
-      height: '100vh',
-      overflow: 'auto',
-    }}
-    >
+    <div>
       <Typography 
       variant="h1"
       component="div"
@@ -29,6 +18,6 @@ export default function Home(){
       >
         Accueil
       </Typography>
-    </Box>
+    </div>
   )
 }

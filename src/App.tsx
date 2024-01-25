@@ -15,6 +15,8 @@ import Signup from "./pages/auth/signup/Signup";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Account from "./pages/account/Account";
 import Planning from "./pages/planning/Planning";
+import EventSignup from "./pages/events/EventSignup";
+
 import { Palette } from "@mui/icons-material";
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -45,10 +47,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ 
-        display: "flex",
-        flexWrap: "wrap",
-        }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", flex: 1}} component="main">
         <Navbar/>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -57,6 +56,7 @@ export default function App() {
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/account" element={<Account />} />
           <Route path="/planning" element={<Planning />} />
+          <Route path="/eventsignup" element={<EventSignup />} />
         </Routes>
       </Box>
     </ThemeProvider>
