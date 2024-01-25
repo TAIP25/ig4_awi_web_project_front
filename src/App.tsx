@@ -40,8 +40,8 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex' }}>
-        <Navbar />
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", flex: 1}} component="main">
+        <Navbar/>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

@@ -67,7 +67,7 @@ function ResponsiveAppBar() {
 
   return (
     
-    <AppBar color='secondary'>
+    <AppBar color='secondary' position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <img src="/vectoriel/logo_FDJ_FINAL.jpg" alt="logo" width="80px" height="47px" />
