@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 
 import CreneauHoraire from "../../interfaces/CreneauHoraire";
 import Poste from "../../interfaces/Poste";
+import Festival from "../../interfaces/Festival";
 import { decodeToken } from "react-jwt";
 import InscriptionBenevole from "../../interfaces/InscriptionBenevole";
 
@@ -12,9 +13,10 @@ import InscriptionBenevole from "../../interfaces/InscriptionBenevole";
 export default function Planning() {
   /* Variables */
   //TODO: handle festivalID
-  const festivalID = 1;
+  const festivalID = 3;
 
   /* UseState */
+  const [festival, setFestival] =  useState<Festival | null>(null);
   const [creneauxHoraires, setCreneauxHoraires] = useState<CreneauHoraire[]>([]);
   const [postes, setPostes] = useState<Poste[]>([]);
   const [inscriptionBenevole, setInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
@@ -22,34 +24,16 @@ export default function Planning() {
   const [myInscriptionBenevole, setMyInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
   const [jour, setJour] = useState<string>("Samedi");
 
-  /* UseEffect */
+  // Fetch festival data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [res1, res2, res3] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`),
-          axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festivalID}`),
-          axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire`),
-        ]);
-  
-        const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/festival/next`);
+        const festival: Festival = res.data;
+        setFestival(festival);
+
         
-        const postes: Poste[] = res2.data.poste;
-
-        const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
-          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
-          const inscriptionBenevole: InscriptionBenevole = {
-            creneauHoraireID: inscription.creneauHoraireID,
-            posteID: inscription.posteID,
-            nombreInscrits: inscription._count.id,
-            nombreMax: nombreMax,
-          };
-          return inscriptionBenevole;
-        });
-
-        setCreneauxHoraires(creneauxHoraires);
-        setPostes(postes);
-        setInscriptionBenevole(inscriptionBenevoleTemp);
+        console.log("Festival édition " + festival.edition);
       } catch (error) {
         console.error(error);
       }
@@ -58,35 +42,87 @@ export default function Planning() {
     fetchData();
   }, []);
 
-  // use effect to update progress bars when inscriptionBenevole is updated
+  /* UseEffect */
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const benevoleID: number = getCookiesBenevoleID();
-        const [res1, res2] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`),
-          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/benevole/${benevoleID}`),
-        ]);
 
-        const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
-          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
-          const inscriptionBenevole: InscriptionBenevole = {
-            creneauHoraireID: inscription.creneauHoraireID,
-            posteID: inscription.posteID,
-            nombreInscrits: inscription._count.id,
-            nombreMax: nombreMax,
-          };
-          return inscriptionBenevole;
-        });
-        if(inscriptionBenevoleTemp !== inscriptionBenevole) {
+    if(festival){
+      const fetchData = async () => {
+        try {
+
+          console.log("Festival id :");
+          console.log(festival?.id);
+  
+          const [res1, res2, res3] = await Promise.all([
+            axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival?.id}/count`),
+            axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festival?.id}`),
+            axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire`),
+          ]);
+    
+          const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
+          
+          
+          const postes: Poste[] = res2.data.postes;
+          
+            
+
+          
+  
+          const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+            const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+            const inscriptionBenevole: InscriptionBenevole = {
+              creneauHoraireID: inscription.creneauHoraireID,
+              posteID: inscription.posteID,
+              nombreInscrits: inscription._count.id,
+              nombreMax: nombreMax,
+            };
+            return inscriptionBenevole;
+          });
+  
+          setCreneauxHoraires(creneauxHoraires);
+          setPostes(postes);
           setInscriptionBenevole(inscriptionBenevoleTemp);
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
+
       }
+      fetchData();
     };
   
-    fetchData();
+  }, [festival]);
+
+  // use effect to update progress bars when inscriptionBenevole is updated
+  useEffect(() => {
+
+    if(festival){
+      const fetchData = async () => {
+        try {
+          const benevoleID: number = getCookiesBenevoleID();
+          const [res1, res2] = await Promise.all([
+            axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival?.id}/count`),
+            axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival?.id}/benevole/${benevoleID}`),
+          ]);
+  
+          const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+            const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+            const inscriptionBenevole: InscriptionBenevole = {
+              creneauHoraireID: inscription.creneauHoraireID,
+              posteID: inscription.posteID,
+              nombreInscrits: inscription._count.id,
+              nombreMax: nombreMax,
+            };
+            return inscriptionBenevole;
+          });
+          if(inscriptionBenevoleTemp !== inscriptionBenevole) {
+            setInscriptionBenevole(inscriptionBenevoleTemp);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchData();
+    }
+    
   }, [inscriptionBenevole]);
 
   /* Functions */
@@ -102,7 +138,7 @@ export default function Planning() {
 
   function reserver(creneauHoraire: CreneauHoraire, poste: Poste) {
     console.log("Réserver: " + creneauHoraire.jour + " " + creneauHoraire.heureDebut + "h - " + creneauHoraire.heureFin + "h" + " " + poste.nom)
-    handleReservation(creneauHoraire, poste, festivalID, getCookiesBenevoleID())
+    handleReservation(creneauHoraire, poste, festival!.id, getCookiesBenevoleID())
   }
 
   async function handleReservation(creneauHoraire: CreneauHoraire, poste: Poste, festival: number, benevole: number) {
@@ -115,7 +151,7 @@ export default function Planning() {
       })
 
       if(res.status === 200) {
-        const countRes = await axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`)
+        const countRes = await axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival}/count`)
         
         const inscriptionBenevoleTemp: InscriptionBenevole[] = countRes.data.inscription.map((inscription: any) => {
           const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
@@ -173,7 +209,7 @@ export default function Planning() {
         fontSize: "4rem",
       }}
       >
-        Planning
+        Planning du festival édition {festival?.edition}
       </Typography>
       <Paper sx={{ p: 2, marginLeft: '3rem', marginRight: '3rem', marginBottom: '1rem', flexGrow: 1, width: "15%", minWidth: "200px" }}>
         <Stack direction="row" spacing={2}>
