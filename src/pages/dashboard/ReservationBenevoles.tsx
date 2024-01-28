@@ -73,7 +73,8 @@
           await fetchCreneauxHoraires();
     
           console.log("Créneaux horaires : " + creneauxHoraires.length);
-    
+          console.log("Réservations de bénévoles : " + reservationBenevoles.length);
+
           // Sélectionner le premier créneau horaire du jour actuel
           const creneauxJourActuel = getCreneauHoraireByDay(selectedDay);
           if (creneauxJourActuel.length > 0) {
@@ -105,7 +106,7 @@
     const fetchReservationData = () => {
       axios.get(`${import.meta.env.VITE_API_URL}/inscriptionBenevole/festival/${festival?.id}/reservations`)
         .then(response => {
-          setReservationBenevoles(response.data.inscriptions.filter((inscription: any) => inscription.status === null && inscription.festivalID === festival!.id))
+          setReservationBenevoles(response.data.inscriptions.filter((inscription: any) => inscription.status == "En attente" && inscription.festivalID === festival!.id))
         })
         .catch(error => {
           console.error(error);
@@ -155,7 +156,7 @@
     const handleRefuseReservation = (reservationBenevole: any) => {
       axios.put(`${import.meta.env.VITE_API_URL}/inscriptionBenevole/${reservationBenevole.id}`, {
         id: reservationBenevole.id,
-        status: false
+        status: "Refusé"
       })
       .then(response => {
         console.log(response.data)
@@ -169,7 +170,7 @@
       // Accepter la réservation
       axios.put(`${import.meta.env.VITE_API_URL}/inscriptionBenevole/${reservationBenevole.id}`, {
         id: reservationBenevole.id,
-        status: true
+        status: "Accepté"
       })
       .then(response => {
         console.log(response.data)
@@ -177,10 +178,11 @@
         // Récupère les autres réservations du bénévole pour le même créneau horaire et le même jour
         const reservationsBenevole = getReservationByCreneauBenevoleFestival(reservationBenevole);
         // Pour chaque réservation, la refuser
-        reservationsBenevole.forEach((reservationBenevole) => {
-          handleRefuseReservation(reservationBenevole);
-        }
-        )
+        reservationsBenevole.forEach((reservation) => {
+          if (reservation.id !== reservationBenevole.id) {
+            handleRefuseReservation(reservation);
+          }
+        })
 
         fetchReservationData();
       })
