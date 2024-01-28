@@ -163,15 +163,33 @@
       })
     }
 
+    // Fonction pour accepter une réservation de bénévole
+    // Refuse automatiquement les autres réservations du bénévole pour le même créneau horaire et le même jour
     const handleAcceptReservation = (reservationBenevole: any) => {
+      // Accepter la réservation
       axios.put(`${import.meta.env.VITE_API_URL}/inscriptionBenevole/${reservationBenevole.id}`, {
         id: reservationBenevole.id,
         status: true
       })
       .then(response => {
         console.log(response.data)
+
+        // Récupère les autres réservations du bénévole pour le même créneau horaire et le même jour
+        const reservationsBenevole = getReservationByCreneauBenevoleFestival(reservationBenevole);
+        // Pour chaque réservation, la refuser
+        reservationsBenevole.forEach((reservationBenevole) => {
+          handleRefuseReservation(reservationBenevole);
+        }
+        )
+
         fetchReservationData();
       })
+
+      // Refuser les autres réservations du bénévole pour le même créneau horaire et le même jour
+    }
+
+    function getReservationByCreneauBenevoleFestival(reservationBenevole: any) {
+      return reservationBenevoles.filter((reservation) => reservation.benevole.id === reservationBenevole.benevole.id && reservation.creneauHoraire.id === reservationBenevole.creneauHoraire.id && reservation.festivalID === reservationBenevole.festivalID)
     }
 
       return (
