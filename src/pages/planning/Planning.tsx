@@ -172,6 +172,7 @@ export default function Planning() {
   }
 
   function handleProgressBars(poste: Poste, creneauHoraire: CreneauHoraire) {
+    
     const inscriptionBenevoleSpe: InscriptionBenevole | undefined = inscriptionBenevole.find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
     if(inscriptionBenevoleSpe === undefined) {
       return 0

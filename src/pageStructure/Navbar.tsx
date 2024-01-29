@@ -13,9 +13,12 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AuthContext from "../context/AuthProvider";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Navigate} from "react-router-dom";
 import Cookies from 'js-cookie';
+import {decodeToken} from 'react-jwt';
+import axios from 'axios';
+import Benevole from '../interfaces/Benevole';
 
 
 const pages = ['Accueil', 'Calendrier'];
@@ -33,10 +36,11 @@ const theme = createTheme({
 });
 
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -64,8 +68,24 @@ function ResponsiveAppBar() {
   useEffect(() => {
     if (Cookies.get('token') != null) {
       setIsAuthenticated(true);
-    }
 
+      // On récupère l'id du membre dans le token
+      const token = Cookies.get('token');
+
+      if (token != null) {
+        const decodedToken: any = decodeToken(token);
+        const id = decodedToken.id_benevole;
+        axios.get(`${import.meta.env.VITE_API_URL}/benevole/${id}`)
+        .then((response) => {
+          if (response.data.statut === "Admin") {
+            setIsAdmin(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      }   
+    }
   }, [isAuthenticated]);
 
   return (
@@ -208,6 +228,12 @@ function ResponsiveAppBar() {
                       Account
                     </Typography>
                   </MenuItem>,
+                  isAdmin && (
+                    <MenuItem key="dashboard" onClick={handleCloseUserMenu}>
+                      <Typography textAlign="center" component="a" href="/dashboard">
+                        Dashboard
+                      </Typography>
+                    </MenuItem>),
                   <MenuItem key="logout" onClick={handleLogout}>
                     <Typography textAlign="center" component="a" href="/login">
                       Logout

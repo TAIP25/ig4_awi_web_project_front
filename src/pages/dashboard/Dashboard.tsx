@@ -11,6 +11,7 @@ import Link from '@mui/material/Link';
 import Chart from './Chart';
 import Overview from './Overview';
 import Benevoles from './Benevoles';
+import ReservationBenevoles from './ReservationBenevoles';
 import Benevole from '../../interfaces/Benevole';
 import { useLocation } from 'react-router-dom';
 //import BenevolesBIS from './BenevolesBIS.tsx';
@@ -18,19 +19,6 @@ import { useLocation } from 'react-router-dom';
 // TODO remove, this demo shouldn't need to reset the theme.
 // TODO fix BenevolesBIS.tsx and refactor this file to use it instead of Benevoles.tsx
 
-
-function Copyright(props: any) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 export default function Dashboard() {
 
@@ -42,7 +30,7 @@ export default function Dashboard() {
 
   /* UseEffect */
   useEffect(() => {
-      axios.get(`${import.meta.env.VITE_API_URL}/benevoles/`, undefined)
+      axios.get(`${import.meta.env.VITE_API_URL}/benevole/`)
       .then(response => {
           setBenevoles(response.data)
       })
@@ -103,8 +91,14 @@ export default function Dashboard() {
               <Benevoles benevoles={benevoles} />
             </Paper>
           </Grid>
+          {/* Demande de reservation */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <ReservationBenevoles/>
+            </Paper>
+          </Grid>
+
         </Grid>
-        <Copyright sx={{ pt: 4 }} />
       </Container>
     </Box>
   );
