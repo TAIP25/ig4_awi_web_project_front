@@ -103,30 +103,43 @@ export default function EventSignup() {
       console.log("Token : " + token);
       const decodedToken : any = decodeToken(token);
       const id_benevole = decodedToken.id_benevole;
+
+      // If Hebergement is "Proposition" and adresse is empty
+      if (data.get('hebergement') === "Proposition" && data.get('adresse') === "") {
+        alert("Vous devez saisir une adresse si vous proposez un hébergement"); 
+        return;
+      }
+
        //Add the relation between the festival and the benevole
       axios.post(`${import.meta.env.VITE_API_URL}/festivalBenevole/`, {
         festivalId: festival?.id,
         benevoleId: id_benevole,
       }).then((response) => {
         console.log(response);
+
+        axios.put(`${import.meta.env.VITE_API_URL}/benevole/${id_benevole}`, {
+          tailleTShirt: data.get('tailleTShirt'),
+          hebergement: data.get('hebergement'),
+          adresse: data.get('adresse'),
+          telephone: data.get('telephone'),
+          vegetarien: checked,
+        }).then((response) => {
+          console.log(response);
+          alert("Inscription réussie");
+        }).catch((error) => {
+          console.log(error);
+          alert(error);
+        });
+
       }).catch((error) => {
+        
         console.log(error);
+        alert("Vous êtes déjà inscrit à ce festival")
+        return;
       });
 
 
-      axios.put(`${import.meta.env.VITE_API_URL}/benevole/${id_benevole}`, {
-        tailleTShirt: data.get('tailleTShirt'),
-        hebergement: data.get('hebergement'),
-        adresse: data.get('adresse'),
-        telephone: data.get('telephone'),
-        vegetarien: checked,
-      }).then((response) => {
-        console.log(response);
-        alert("Inscription réussie");
-      }).catch((error) => {
-        console.log(error);
-        alert(error);
-      });
+      
     }
   };
 
