@@ -2,11 +2,9 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import Link from '@mui/material/Link';
 
 import Chart from './Chart';
 import Overview from './Overview';
@@ -14,6 +12,7 @@ import Benevoles from './Benevoles';
 import ReservationBenevoles from './ReservationBenevoles';
 import Benevole from '../../interfaces/Benevole';
 import { useLocation } from 'react-router-dom';
+import HandlePoste from './HandlePoste';
 //import BenevolesBIS from './BenevolesBIS.tsx';
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -94,10 +93,15 @@ export default function Dashboard() {
           {/* Demande de reservation */}
           <Grid item xs={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              <ReservationBenevoles/>
+              {/* <ReservationBenevoles/> */}
             </Paper>
           </Grid>
-
+          {/* Gestion des postes */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <HandlePoste />
+            </Paper>
+          </Grid>
         </Grid>
       </Container>
     </Box>
