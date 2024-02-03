@@ -6,46 +6,100 @@ import Title from "./Title";
 import Poste from "../../interfaces/Poste";
 
 // TODO: Finish implementing this page
-export default function HandlePoste() {
+
+interface HandlePosteProps {
+  currentFestival: number;
+}
+
+export default function HandlePoste( { currentFestival }: HandlePosteProps ) {
 
   /* Constants */
-  const FESTIVAL = 3;
 
   /* UseState */
   const [postes, setPostes] = useState<Poste[]>([]);
   const [open, setOpen] = useState(false);
+  const [poste, setPoste] = useState<Poste>({
+    id: 0,
+    nom: "",
+    description: "",
+    nombreBenevoles: 0
+  });
+  const [error, setError] = useState(false);
 
   /* UseEffect */
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${FESTIVAL}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${currentFestival}`)
     .then(response => {
-      console.log(response.data.postes)
       setPostes(response.data.postes)
     })
-  }, [])
+  }, [currentFestival])
 
   /* Functions */
-  const handleOpen = () => {
+  const handleOpen = (_: React.MouseEvent<HTMLButtonElement>, poste?: Poste) => {
+    if (poste) {
+      setPoste(poste)
+    }
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setError(false);
+    setPoste({
+      id: -1,
+      nom: "",
+      description: "",
+      nombreBenevoles: 0
+    })
   };
 
-  async function addPoste(nom: string, description: string, nombreBenevoles: number) {
-    await axios.post(`${import.meta.env.VITE_API_URL}/poste/`, {
-      nom: nom,
-      description: description,
-      nombreBenevoles: nombreBenevoles,
-      festival: FESTIVAL
-    })
-    .then(response => {
-      console.log(response.data)
-      setPostes([...postes, response.data.poste])
+  function handlePosteChange(e: any) {
+    setPoste({
+      ...poste,
+      [e.target.name]: e.target.value
     })
   }
 
+  async function addPoste(id: number, nom: string, description: string, nombreBenevoles: number) {
+    setError(true)
+    
+    if (nom === "" || description === "" || nombreBenevoles === 0) {
+      return
+    }
+    if(id !== -1) {
+
+      await axios.put(`${import.meta.env.VITE_API_URL}/poste/${id}`, {
+        nom: nom,
+        description: description,
+        nombreBenevoles: nombreBenevoles,
+        festivalId: currentFestival
+      })
+      .then(response => {
+        setPostes([...postes.filter((poste) => poste.id !== id), response.data.poste])
+      })
+    } else {
+      await axios.post(`${import.meta.env.VITE_API_URL}/poste`, {
+        nom: nom,
+        description: description,
+        nombreBenevoles: nombreBenevoles,
+        festivalId: currentFestival
+      })
+      .then(response => {
+        setPostes([...postes, response.data.poste])
+      })
+    }
+
+    handleClose()
+  }
+
+  async function deletePoste(id: number) {
+    await axios.delete(`${import.meta.env.VITE_API_URL}/poste/${id}`)
+    .then(() => {
+      setPostes([...postes.filter((poste) => poste.id !== id)])
+    })
+
+    handleClose()
+  }
 
   return (
     <Box
@@ -57,7 +111,7 @@ export default function HandlePoste() {
       <Title>Poste</Title>
       <Stack spacing={2} sx={{ m: 2 }}>
         {postes.map((poste) => (
-          <Button key={poste.id} variant="contained" color="primary" sx={{ m: 1 }}>
+          <Button key={poste.id} variant="contained" color="primary" sx={{ m: 1 }} onClick={(e) => handleOpen(e, poste)}>
             {poste.nom}
           </Button>
         ))}
@@ -85,16 +139,40 @@ export default function HandlePoste() {
               <Typography variant="h6" component="div">
                 Ajouter un poste
               </Typography>
-              { ["nom", "description", "nombre de bénévoles nécessaires"].map((label) => (
-                <TextField key={label} id="standard-basic" label={label+"*"} color="primary" sx={{ m: 1 }} />
+              { [{label: "nom", name: "nom"}, {label: "description", name: "description"}, {label: "nombre de bénévoles nécessaires", name: "nombreBenevoles"}].map(({label, name}) => (
+                <TextField
+                  error={
+                    error &&
+                    (poste[name as keyof Poste] === "" ||
+                      (name === "nombreBenevoles" && poste[name as keyof Poste] === 0))
+                  }
+                  key={label} 
+                  id="standard-basic" 
+                  label={label+"*"} 
+                  color="primary" 
+                  sx={{ m: 1 }} 
+                  name={name} 
+                  type={name === "nombreBenevoles" ? "number" : "text"}
+                  value={poste[name as keyof Poste]}
+                  onChange={handlePosteChange}
+                />
               )) }
               <Stack spacing={2} direction="row" sx={{ m: 1 }}>
-                <Button variant="contained" color="primary" sx={{ m: 1 }}>
-                  Ajouter
+                <Button variant="contained" color="primary" sx={{ m: 1 }} onClick={() => addPoste(poste.id, poste.nom, poste.description, poste.nombreBenevoles)}>
+                  { poste.id !== -1 ? "Modifier" : "Ajouter" }
                 </Button>
                 <Button variant="outlined" color="primary" sx={{ m: 1 }} onClick={handleClose}>
                   Annuler
                 </Button>
+                { poste.id !== -1 &&
+                  <Button 
+                    variant="contained" 
+                    color="error"
+                    onClick={() => deletePoste(poste.id)}
+                  >
+                    Supprimer
+                  </Button>
+                }
               </Stack>
             </Stack>
           </Box>
