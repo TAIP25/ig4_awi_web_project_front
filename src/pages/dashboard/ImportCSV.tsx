@@ -235,7 +235,7 @@ export default function ImportCSV() {
                                 jeuID: jeu.id,
                                 festivalID: festival!.id,
                                 sousEspaceDeJeuID: sousEspaceJeu.id,
-                            }).then((response) => {
+                            }).then((_response) => {
                                 //console.log(response.data.message);
                             }).catch((error) => {
                                 alert(error.response.data.error);
