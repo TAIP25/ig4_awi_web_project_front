@@ -10,6 +10,7 @@ import Chart from './Chart';
 import Overview from './Overview';
 import Benevoles from './Benevoles';
 import ReservationBenevoles from './ReservationBenevoles';
+import ImportCSV from './ImportCSV';
 import Benevole from '../../interfaces/Benevole';
 import { useLocation } from 'react-router-dom';
 import HandlePoste from './HandlePoste';
@@ -132,6 +133,12 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
               <HandlePoste currentFestival={currentFestival} />
+            </Paper>
+          </Grid>
+          {/* Import du CSV */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <ImportCSV/>
             </Paper>
           </Grid>
         </Grid>
