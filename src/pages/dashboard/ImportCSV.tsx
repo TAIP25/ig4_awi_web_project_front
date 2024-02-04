@@ -9,7 +9,6 @@ import {
     Box,
     Button,
     TextField,
-    Paper,
     Stack,
     Typography,
   } from '@mui/material';
@@ -23,7 +22,6 @@ export default function ImportCSV() {
     const [nbErrors, setNbErrors] = useState<number>(0);
     const [festival, setFestival] = useState<Festival | null>(null);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const [replaceExisting, setReplaceExisting] = useState<boolean>(false);
     const [selectedGamesToReplace, setSelectedGamesToReplace] = useState<any[]>([]);
     const [selectedGamesToKeep, setSelectedGamesToKeep] = useState<any[]>([]);
 
@@ -62,7 +60,7 @@ export default function ImportCSV() {
     const handleReplaceExisting = async () => {
     setOpenDialog(false);
     
-    for (const gameToReplace of selectedGamesToReplace) {
+    for (const gameToReplace of selectedGamesToKeep) {
         try {
         await updateJeu(gameToReplace);
         } catch (error) {
@@ -259,9 +257,7 @@ export default function ImportCSV() {
                     handleDialogOpen(); // Ajoutez cette ligne pour ouvrir la boîte de dialogue
                     },
                 });
-            };
-
-            
+            };  
         }
     }
       
@@ -311,8 +307,6 @@ export default function ImportCSV() {
                     </DialogActions>
                 </Dialog>
             )}
-            
-
         </Box>
     );
 }
