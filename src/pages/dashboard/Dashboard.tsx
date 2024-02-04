@@ -13,6 +13,10 @@ import ReservationBenevoles from './ReservationBenevoles';
 import ImportCSV from './ImportCSV';
 import Benevole from '../../interfaces/Benevole';
 import { useLocation } from 'react-router-dom';
+import HandlePoste from './HandlePoste';
+import Festival from '../../interfaces/Festival';
+import FestivalSelect from './FestivalSelect';
+import { Divider } from '@mui/material';
 //import BenevolesBIS from './BenevolesBIS.tsx';
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -26,14 +30,36 @@ export default function Dashboard() {
 
   /* UseState */
   const [benevoles, setBenevoles] = useState<Benevole[]>([]);
+  const [currentFestival, setCurrentFestival] = useState<number>(-1);
+  const [nextFestival, setNextFestival] = useState<number>(-1);
+  const [allFestivals, setAllFestivals] = useState<Festival[]>([]);
 
   /* UseEffect */
   useEffect(() => {
-      axios.get(`${import.meta.env.VITE_API_URL}/benevole/`)
-      .then(response => {
-          setBenevoles(response.data)
-      })
+    axios.get(`${import.meta.env.VITE_API_URL}/festival/`)
+    axios.get(`${import.meta.env.VITE_API_URL}/benevole/`)
+    .then(response => {
+      setBenevoles(response.data)
+    })
   }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [res1, res2] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/festival/`),
+          axios.get(`${import.meta.env.VITE_API_URL}/festival/next`),
+        ]);
+
+        setAllFestivals(res1.data);
+        setCurrentFestival(res2.data.id);
+        setNextFestival(res2.data.id);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchData();
+  }, []);      
 
   return (
     <Box
@@ -90,20 +116,31 @@ export default function Dashboard() {
               <Benevoles benevoles={benevoles} />
             </Paper>
           </Grid>
+          <Grid item xs={12}>
+            <Divider sx={{ mb: 2, mt: 2 }} />
+            {/* Festival selection */}
+            { currentFestival !== -1 && 
+              <FestivalSelect currentFestival={currentFestival} setCurrentFestival={setCurrentFestival} allFestivals={allFestivals} />
+            }
+          </Grid>
           {/* Demande de reservation */}
           <Grid item xs={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              <ReservationBenevoles/>
+              {/* <ReservationBenevoles/> */}
             </Paper>
           </Grid>
-
+          {/* Gestion des postes */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <HandlePoste currentFestival={currentFestival} />
+            </Paper>
+          </Grid>
           {/* Import du CSV */}
           <Grid item xs={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
               <ImportCSV/>
             </Paper>
           </Grid>
-
         </Grid>
       </Container>
     </Box>
