@@ -1,4 +1,4 @@
-  import { Fragment, useEffect, useState } from 'react';
+  import {useEffect, useState } from 'react';
   import axios from 'axios';
   import Festival from "../../interfaces/Festival";
   import CreneauHoraire from "../../interfaces/CreneauHoraire";

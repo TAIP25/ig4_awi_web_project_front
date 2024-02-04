@@ -15,7 +15,6 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
 import {decodeToken} from 'react-jwt';
 import Cookies from 'js-cookie';
 import  Festival  from '../../interfaces/Festival';
@@ -81,13 +80,12 @@ export default function EventSignup() {
     });
   }, []);
   
-  const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChecked = (_event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked((prev) => !prev);
     console.log(checked);
   };
 
   
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
 

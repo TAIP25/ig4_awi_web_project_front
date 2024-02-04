@@ -9,7 +9,6 @@ import Paper from '@mui/material/Paper';
 import Chart from './Chart';
 import Overview from './Overview';
 import Benevoles from './Benevoles';
-import ReservationBenevoles from './ReservationBenevoles';
 import ImportCSV from './ImportCSV';
 import Benevole from '../../interfaces/Benevole';
 import { useLocation } from 'react-router-dom';
@@ -31,7 +30,7 @@ export default function Dashboard() {
   /* UseState */
   const [benevoles, setBenevoles] = useState<Benevole[]>([]);
   const [currentFestival, setCurrentFestival] = useState<number>(-1);
-  const [nextFestival, setNextFestival] = useState<number>(-1);
+  const [_nextFestival, setNextFestival] = useState<number>(-1);
   const [allFestivals, setAllFestivals] = useState<Festival[]>([]);
 
   /* UseEffect */

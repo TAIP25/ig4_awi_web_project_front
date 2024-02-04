@@ -1,4 +1,4 @@
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useState, useContext } from "react";
 import AuthContext from "../../context/AuthProvider";
 import { Navigate} from "react-router-dom";
@@ -24,7 +24,7 @@ const style = {
 export default function Account() {
   const [benevole, setBenevole] = useState<Benevole>();
   const [isEditing, setIsEditing] = useState(false);
-  const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
+  const {setIsAuthenticated} = useContext(AuthContext);
   const [isDeleted, setIsDeleted] = useState(false);
 
   // Modal 

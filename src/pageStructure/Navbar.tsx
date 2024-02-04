@@ -11,29 +11,15 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AuthContext from "../context/AuthProvider";
 import { useContext, useEffect, useState } from "react";
 import { Navigate} from "react-router-dom";
 import Cookies from 'js-cookie';
 import {decodeToken} from 'react-jwt';
 import axios from 'axios';
-import Benevole from '../interfaces/Benevole';
 
 
-const pages = ['Accueil', 'Calendrier'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#888888',
-    },
-    secondary: {
-      main: '#FF0000',
-    },
-  }
-});
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
