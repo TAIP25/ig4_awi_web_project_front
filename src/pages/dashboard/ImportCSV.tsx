@@ -36,22 +36,27 @@ export default function ImportCSV() {
     };
     
     const handleCheckboxChange = (selectedGame: any, checked: boolean) => {
-    if (checked) {
-        // On ajoute le jeu dans le tableau selectedGamesToKeep
-        setSelectedGamesToKeep((prevSelected) => [...prevSelected, selectedGame]);
-    } else {
-        // On enlève le jeu du tableau selectedGamesToKeep
-        setSelectedGamesToKeep((prevSelected) =>
-            prevSelected.filter((prevSelectedGame) => prevSelectedGame.id !== selectedGame.id)
-        );
-    }
+        if (checked) {
+            // On ajoute le jeu dans le tableau selectedGamesToKeep
+            setSelectedGamesToKeep((prevSelected) => [...prevSelected, selectedGame]);
+        } else {
+            // On enlève le jeu du tableau selectedGamesToKeep
+            setSelectedGamesToKeep((prevSelected) => {
+                const index = prevSelected.findIndex((prevSelectedGame) => prevSelectedGame.id === selectedGame.id);
+                if (index === -1) {
+                    return prevSelected;
+                }
+                return [...prevSelected.slice(0, index), ...prevSelected.slice(index + 1)];
+            }
+            );
+        }
 
-    // Update the checked state directly in the selectedGamesToReplace array
-    setSelectedGamesToReplace((prevSelected) =>
-        prevSelected.map((prevSelectedGame) =>
-            prevSelectedGame.id === selectedGame.id ? { ...prevSelectedGame, checked } : prevSelectedGame
-        )
-    );
+        // Update the checked state directly in the selectedGamesToReplace array
+        setSelectedGamesToReplace((prevSelected) =>
+            prevSelected.map((prevSelectedGame) =>
+                prevSelectedGame.id === selectedGame.id ? { ...prevSelectedGame, checked } : prevSelectedGame
+            )
+        );
     };
     
     const handleReplaceExisting = async () => {
@@ -78,7 +83,7 @@ export default function ImportCSV() {
         setFestival(festival);
 
         
-        console.log("Festival édition " + festival.edition);
+        //console.log("Festival édition " + festival.edition);
         } catch (error) {
         console.error(error);
         }
@@ -143,8 +148,8 @@ export default function ImportCSV() {
             return response.data.jeu;
         }catch (error:any) {
             // Si le jeu existe déjà, on l'ajoute dans le tableau des jeux déjà existants
-            console.log("Ajout du jeu dans les jeux déjà existants");
-            console.log(error.response.data.jeu);
+            //console.log("Ajout du jeu dans les jeux déjà existants");
+            //console.log(error.response.data.jeu);
             setSelectedGamesToReplace((prevSelected) => [...prevSelected, row]);  
             setNbErrors(nbErrors + 1);
             throw error; // Rejetez l'erreur pour que la promesse soit rejetée
@@ -159,7 +164,7 @@ export default function ImportCSV() {
                 festivalID: festival!.id,
             });
     
-            console.log(response.data.message);
+            //console.log(response.data.message);
             return response.data.espaceDeJeu;
         } catch (error:any) {
             // L'espace de jeu existe déjà, on le renvoie quand même
@@ -181,7 +186,7 @@ export default function ImportCSV() {
                 espaceDeJeuID:  espaceJeuId,
             });
 
-            console.log(response.data.message);
+            //console.log(response.data.message);
             return response.data.sousEspaceDeJeu;
         }catch(error:any) {
             return error.response.data.sousEspaceDeJeu;
@@ -193,7 +198,7 @@ export default function ImportCSV() {
             // Utilisez FileReader pour lire le contenu du fichier
             const reader = new FileReader();
             reader.readAsText(file, 'UTF-8');
-            console.log(file);
+            //console.log(file);
 
             reader.onload = () => {
 
@@ -203,14 +208,14 @@ export default function ImportCSV() {
                 }
                 const csvData = reader.result?.toString();
                 
-                //console.log(csvData);
+                ////console.log(csvData);
 
                 // Utilisez papaparse pour traiter le CSV
                 Papa.parse(csvData, {
                     header: true, // Indique qu'il y a un en-tête dans le CSV
                     complete: async (result) => {
                     // result.data contient les données du CSV
-                    console.log(result.data);
+                    //console.log(result.data);
                     
                     let index = 0;
                     // Parcours chaque ligne du CSV
@@ -224,16 +229,16 @@ export default function ImportCSV() {
                             // On essaie de créer le sous espace de jeu avec les données dans les colonnes : Zone bénévole
                             const sousEspaceJeu = await createSousEspaceJeu(row, espaceJeu.id);
 
-                            console.log("Id du jeu : " + jeu.id);
-                            console.log("Id du festival : " + festival!.id);
-                            console.log("Id du sous espace de jeu : " + sousEspaceJeu.id);
+                            //console.log("Id du jeu : " + jeu.id);
+                            //console.log("Id du festival : " + festival!.id);
+                            //console.log("Id du sous espace de jeu : " + sousEspaceJeu.id);
                             // On créé la relation entre le jeu, le sous espace de jeu et le festival
                             axios.post(`${import.meta.env.VITE_API_URL}/jeuSousEspaceFestival`, {
                                 jeuID: jeu.id,
                                 festivalID: festival!.id,
                                 sousEspaceDeJeuID: sousEspaceJeu.id,
                             }).then((response) => {
-                                console.log(response.data.message);
+                                //console.log(response.data.message);
                             }).catch((error) => {
                                 alert(error.response.data.error);
                             });
@@ -249,8 +254,8 @@ export default function ImportCSV() {
                         setProgress(progressPercentage);
                         index++;                
                     }
-                    console.log("Import terminé avec " + nbErrors + " erreurs");
-                    console.log("Import terminé avec " + selectedGamesToReplace.length + " jeux déjà existants");
+                    //console.log("Import terminé avec " + nbErrors + " erreurs");
+                    //console.log("Import terminé avec " + selectedGamesToReplace.length + " jeux déjà existants");
                     handleDialogOpen(); // Ajoutez cette ligne pour ouvrir la boîte de dialogue
                     },
                 });
@@ -288,7 +293,6 @@ export default function ImportCSV() {
                                 // Si check box est cochée on ajoute le jeu dans le tableau selectedGamesToKeep
                                 // Sinon on l'enlève
                                 <Checkbox
-                                    checked={selectedGamesToKeep.find((selectedGame) => selectedGame.id === game.id)}
                                     onChange={(e) => handleCheckboxChange(game, e.target.checked)}
                                 />
                                 }
