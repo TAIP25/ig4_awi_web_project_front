@@ -57,7 +57,7 @@ export default function SignUp() {
       return;
     }
 
-
+    console.log(`${import.meta.env.VITE_API_URL}/benevole/`)
     axios.post(`${import.meta.env.VITE_API_URL}/benevole/`, {
       email: data.get('email'),
       password: data.get('password'),
