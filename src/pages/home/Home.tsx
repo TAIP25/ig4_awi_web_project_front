@@ -83,7 +83,7 @@ export default function Home(){
   //Refactor with planning component
   const week: string[] = ["Samedi", "Dimanche"];
   
-  const {isAuthenticated, _} = useContext(AuthContext);
+  const {isAuthenticated} = useContext(AuthContext);
 
   /* UseState */
   const [jour, setJour] = React.useState(week[0]);
