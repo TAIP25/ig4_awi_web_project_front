@@ -11,45 +11,70 @@ import CreneauHoraire from "../../interfaces/CreneauHoraire"
 import Poste from "../../interfaces/Poste"
 //import "./Home.scss"
 
-const NEWS = [
-  {
-    id: 1,
-    title: "News 1",
-    content: "Content 1"
-  },
-  {
-    id: 2,
-    title: "News 2",
-    content: "Content 2"
-  }
-]
-
 const EVENTS = [
   {
     id: 1,
-    title: "Event 1",
-    content: "Content 1"
+    title: "Festival de Jeux de Société 2024",
+    content: "Le Festival de Jeux de Société 2024 ouvrira ses portes demain au centre des congrès de la ville. Des centaines de jeux seront disponibles pour tous les âges et niveaux, avec des tournois, des démonstrations et des invités spéciaux attendus."
   },
   {
     id: 2,
-    title: "Event 2",
-    content: "Content 2"
+    title: "Soirée VIP d'Avant-première",
+    content: "Les organisateurs du Festival de Jeux de Société tiendront une soirée VIP d'avant-première ce soir, réservée aux sponsors, aux médias et aux invités spéciaux. Les participants auront un accès exclusif aux nouveaux jeux, aux cadeaux et à un cocktail d'ouverture."
   }
 ]
+
+const NEWS = [
+  {
+    id: 1,
+    title: "Nouveau Jeu Révolutionnaire Dévoilé",
+    content: "Lors de la conférence de presse du Festival de Jeux de Société, un nouveau jeu révolutionnaire intitulé 'Stratégie Galactique' a été dévoilé. Les premiers retours des critiques et des joueurs sont extrêmement positifs, prédisant qu'il deviendra rapidement un classique."
+  },
+  {
+    id: 2,
+    title: "Rencontre avec les Créateurs de Jeux",
+    content: "Une séance de rencontre avec les créateurs de jeux les plus en vogue du moment est prévue pour demain au Festival. Les passionnés auront l'occasion de poser des questions, de partager des idées et de découvrir les coulisses de la création de jeux."
+  }
+]
+
 
 const REFERENTS = [
   {
     id: 1,
-    title: "Referent 1",
+    title: "Animation - Référent 1",
     content: "email@example.com"
   },
   {
     id: 2,
-    title: "Referent 2",
+    title: "Animation - Référent 2",
     content: "email@example.com"
-  }
-]
-
+  },
+  {
+    id: 3,
+    title: "Buvette - Référent 1",
+    content: "email@example.com"
+  },
+  {
+    id: 4,
+    title: "Buvette - Référent 2",
+    content: "email@example.com"
+  },
+  {
+    id: 5,
+    title: "Restauration - Référent 1",
+    content: "email@example.com"
+  },
+  {
+    id: 6,
+    title: "Restauration - Référent 2",
+    content: "email@example.com"
+  },
+  {
+    id: 7,
+    title: "Sécurité - Référent 1",
+    content: "email@example.com"
+  },
+];
 
 export default function Home(){
   /* Variables */
@@ -157,8 +182,8 @@ export default function Home(){
         Accueil
       </Typography>
       <Stack spacing={10} direction="row" sx={{ p: 10, marginLeft: '3rem', marginRight: '3rem' }}>
-        <Stack spacing={2} sx={{ width: "100%" }}>
-        <Switch week={week} setJour={setJour} jour={jour} sx={{ alignSelf: "flex-start" }} />
+        <Stack spacing={2} sx={{ width: "60%" }}>
+          <Switch week={week} setJour={setJour} jour={jour} sx={{ alignSelf: "flex-start" }} />
           <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid" }}>
             <Typography variant="h6" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
               Planning
@@ -196,7 +221,7 @@ export default function Home(){
             </Stack>
           </Paper>
         </Stack>
-        <Stack spacing={2} sx={{ width: "35%" }}>
+        <Stack spacing={2} sx={{ width: "40%" }}>
           <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid"}}>
             <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
               News
