@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Paper } from "@mui/material";
 import { useEffect, useState, useContext } from "react";
 import AuthContext from "../../context/AuthProvider";
 import { Navigate} from "react-router-dom";
@@ -8,6 +8,7 @@ import Modal from '@mui/material/Modal';
 import Benevole from "../../interfaces/Benevole";
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { tailleTShirt, hebergement } from "../../interfaces/Enums";
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -19,6 +20,18 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+};
+
+const styleLabel = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+};
+
+const styleButton = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
 export default function Account() {
@@ -91,16 +104,65 @@ export default function Account() {
 
 
   return (
-    <>
+    <Paper 
+     sx={{
+      margin: 'auto',
+      p: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      width: 750,
+     }}
+    >
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
         Mon compte
       </Typography>
       <Grid container spacing={2}>
+        <Grid 
+        sx={styleLabel}
+         item xs={12} md={2}>
+          Pseudo :
+        </Grid>
         <Grid item xs={12} md={4}>
+          <TextField 
+          id="outlined-basic" 
+          variant="outlined" 
+          disabled={!isEditing} 
+          placeholder={benevole?.pseudo} 
+          value={benevole?.pseudo}
+          onChange={(event) => setBenevole({...benevole!, pseudo: event.target.value})}
+          />
+        </Grid>
+        <Grid sx={styleLabel} item xs={12} md={2}>
+          Taille T-Shirt :
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            required
+            disabled={!isEditing}
+            onChange={(event) => setBenevole({...benevole!, tailleTShirt: event.target.value})}
+            fullWidth
+            select
+            SelectProps={{
+              native: true,
+            }}
+            name="tailleTShirt"
+            id="tailleTShirt"
+          >
+            <option selected key={benevole?.tailleTShirt} value={benevole?.tailleTShirt}>
+              {benevole?.tailleTShirt}
+            </option>
+            {tailleTShirt.filter((option) => option.value !== benevole?.tailleTShirt).map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid sx={styleLabel} item xs={12} md={2}>
           Nom :
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={4}>
           <TextField 
           id="outlined-basic" 
           variant="outlined" 
@@ -110,10 +172,37 @@ export default function Account() {
           onChange={(event) => setBenevole({...benevole!, nom: event.target.value})}
           />
         </Grid>
+        <Grid sx={styleLabel} item xs={12} md={2}>
+          Hébergement :
+        </Grid>
         <Grid item xs={12} md={4}>
+          <TextField
+            required
+            disabled={!isEditing}
+            onChange={(event) => setBenevole({...benevole!, hebergement: event.target.value})}
+            fullWidth
+            select
+            SelectProps={{
+              native: true,
+            }}
+            name="hebergement"
+            id="hebergement"
+          >
+            <option selected key={benevole?.hebergement} value={benevole?.hebergement}>
+              {benevole?.hebergement}
+            </option>
+            {hebergement.filter((option) => option.value !== benevole?.hebergement).map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </TextField>
+        </Grid>
+
+        <Grid sx={styleLabel} item xs={12} md={2}>
           Prénom :
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={4}>
           <TextField 
           id="outlined-basic" 
           variant="outlined" 
@@ -123,10 +212,24 @@ export default function Account() {
           onChange={(event) => setBenevole({...benevole!, prenom: event.target.value})}
           />
         </Grid>
+        <Grid sx={styleLabel} item xs={12} md={2}>
+          Adresse :
+        </Grid>
         <Grid item xs={12} md={4}>
+          <TextField 
+          id="outlined-basic" 
+          variant="outlined" 
+          disabled={!isEditing} 
+          placeholder={benevole?.adresse} 
+          value={benevole?.adresse}
+          onChange={(event) => setBenevole({...benevole!, adresse: event.target.value})}
+          />
+        </Grid>
+
+        <Grid sx={styleLabel} item xs={12} md={2}>
           Email :
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={4}>
           <TextField 
           id="outlined-basic" 
           variant="outlined" 
@@ -136,10 +239,36 @@ export default function Account() {
           onChange={(event) => setBenevole({...benevole!, email: event.target.value})}
           />
         </Grid>
+        <Grid sx={styleLabel} item xs={12} md={2}>
+          Végétarien :
+        </Grid>
         <Grid item xs={12} md={4}>
+        <TextField
+            required
+            disabled={!isEditing}
+            onChange={(event) => setBenevole({...benevole!, vegetarien: event.target.value === "Oui" ? true : false})}
+            fullWidth
+            select
+            SelectProps={{
+              native: true,
+            }}
+            name="vegetarien"
+            id="vegetarien"
+          >
+            <option selected key={benevole?.vegetarien ? "Oui" : "Non"} value={benevole?.vegetarien ? "Oui" : "Non" }>
+              {benevole?.vegetarien ? "Oui" : "Non"}
+            </option>
+            <option key={benevole?.vegetarien ? "Non" : "Oui"} value={benevole?.vegetarien ? "Non" : "Oui"} >
+              {benevole?.vegetarien ? "Non" : "Oui"}
+            </option>
+          </TextField>
+        </Grid>
+
+
+        <Grid sx={styleLabel} item xs={12} md={2}>
           Mot de passe :
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={4}>
           <TextField 
           type="password" 
           id="outlined-basic" 
@@ -148,7 +277,19 @@ export default function Account() {
           placeholder={benevole?.password} 
           value={benevole?.password}/>
         </Grid>
+        <Grid sx={styleLabel} item xs={12} md={2}>
+          Téléphone :
+        </Grid>
         <Grid item xs={12} md={4}>
+          <TextField  
+          id="outlined-basic" 
+          variant="outlined" 
+          disabled={!isEditing} 
+          placeholder={benevole?.telephone} 
+          value={benevole?.telephone}/>
+        </Grid>
+
+        <Grid sx={styleButton} item xs={12} md={6}>
           <Button 
           id="updateButton" 
           variant="contained" 
@@ -157,7 +298,7 @@ export default function Account() {
             {isEditing ? "Valider les modifications" : "Modifier mes informations"}
           </Button>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid sx={styleButton} item xs={12} md={6}>
           <Button 
           id="deleteButton" 
           variant="contained" 
@@ -187,7 +328,7 @@ export default function Account() {
         </Grid>
       </Grid>
     </Box>
-    </>
+    </Paper>
     
   );
 }
