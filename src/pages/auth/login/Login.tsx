@@ -60,7 +60,7 @@ export default function Login() {
 
   if (isAuthenticated) {
     return (
-      <Navigate to="/" />
+      <Navigate to="/eventsignup" />
     )
   }
 

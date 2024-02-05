@@ -89,7 +89,8 @@ function ResponsiveAppBar() {
                 </Typography>
               </Button>
             </NavLink>
-            <NavLink to="/planning" style={{color: 'inherit'}}>
+            {isAuthenticated &&
+              <NavLink to="/planning" style={{color: 'inherit'}}>
               <Button 
                 color="inherit"
                 sx={{
@@ -106,6 +107,8 @@ function ResponsiveAppBar() {
                 </Typography>
               </Button>
             </NavLink>
+            }
+            
           </Stack>
           <Divider variant="middle" orientation="vertical" flexItem sx={{mx: 2, border: '1.5px solid white'}} />
           <Box sx={{ flexGrow: 0 }}>
