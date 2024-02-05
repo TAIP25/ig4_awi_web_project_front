@@ -11,6 +11,8 @@ export default interface Benevole {
     gameFavori: number | undefined,
     picture: number | undefined,
     associationID: number | undefined,
+    adresse: string | undefined,
+    telephone: string | undefined,
     createdAt: Date,
     updatedAt: Date
 }
