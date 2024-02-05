@@ -126,7 +126,7 @@ export default function Dashboard() {
           {/* Demande de reservation */}
           <Grid item xs={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              {<ReservationBenevoles/>}
+              <ReservationBenevoles/>
             </Paper>
           </Grid>
           {/* Gestion des postes */}
