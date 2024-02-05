@@ -26,7 +26,7 @@ export default function Chart({benevoles}: {benevoles: Benevole[]}) {
 
   return (
     <React.Fragment>
-      <Title>Cette semaine</Title>
+      <Title>Historique des inscriptions</Title>
       <ResponsiveContainer>
         <BarChart
           data={createData(benevoles)}
