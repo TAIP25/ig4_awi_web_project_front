@@ -1,7 +1,7 @@
 import { Box, Paper, Stack, Typography } from "@mui/material"
 
 import Switch from "../planning/Switch"
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import MonInscriptionBenevole from "../../interfaces/MonInscriptionBenevole"
 import Festival from "../../interfaces/Festival"
 import axios from "axios"
@@ -9,6 +9,7 @@ import { decodeToken } from "react-jwt"
 import Cookies from 'js-cookie';
 import CreneauHoraire from "../../interfaces/CreneauHoraire"
 import Poste from "../../interfaces/Poste"
+import AuthContext from "../../context/AuthProvider"
 //import "./Home.scss"
 
 const EVENTS = [
@@ -81,6 +82,8 @@ export default function Home(){
   //TODO: handle week if the festival is not on saturday and sunday
   //Refactor with planning component
   const week: string[] = ["Samedi", "Dimanche"];
+  
+  const {isAuthenticated, _} = useContext(AuthContext);
 
   /* UseState */
   const [jour, setJour] = React.useState(week[0]);
@@ -183,26 +186,30 @@ export default function Home(){
       </Typography>
       <Stack spacing={10} direction="row" sx={{ p: 10, marginLeft: '3rem', marginRight: '3rem' }}>
         <Stack spacing={2} sx={{ width: "60%" }}>
-          <Switch week={week} setJour={setJour} jour={jour} sx={{ alignSelf: "flex-start" }} />
-          <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid" }}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-              Planning
-            </Typography>
-            <Stack spacing={2} direction="row" sx={{ justifyContent: "center" }}>
-              {getCreneauHoraireByDay(jour).map((creneauHoraire) => (
-                <Paper key={creneauHoraire.id} sx={{ p: 2, borderColor: "primary.main", borderWidth: "2px", borderStyle: "solid" }}>
-                  <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-                    {creneauHoraire.heureDebut}h - {creneauHoraire.heureFin}h
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Typography variant="body1" component="div" display={"flex"} justifyContent={"center"} sx={{ fontWeight: postes.find((poste: Poste) => poste.id === myInscriptionBenevole.find((inscription: MonInscriptionBenevole) => inscription.creneauHoraireID === creneauHoraire.id)?.posteID) ? "bold" : "normal" }}>
-                      {postes.find((poste: Poste) => poste.id === myInscriptionBenevole.find((inscription: MonInscriptionBenevole) => inscription.creneauHoraireID === creneauHoraire.id)?.posteID)?.nom || "Aucun poste"}
+          {isAuthenticated &&
+            <Switch week={week} setJour={setJour} jour={jour} sx={{ alignSelf: "flex-start" }} /> 
+          }
+          {isAuthenticated &&
+            <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid" }}>
+              <Typography variant="h6" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
+                Planning
+              </Typography>
+              <Stack spacing={2} direction="row" sx={{ justifyContent: "center" }}>
+                {getCreneauHoraireByDay(jour).map((creneauHoraire) => (
+                  <Paper key={creneauHoraire.id} sx={{ p: 2, borderColor: "primary.main", borderWidth: "2px", borderStyle: "solid" }}>
+                    <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
+                      {creneauHoraire.heureDebut}h - {creneauHoraire.heureFin}h
                     </Typography>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
-          </Paper>
+                    <Stack spacing={2}>
+                      <Typography variant="body1" component="div" display={"flex"} justifyContent={"center"} sx={{ fontWeight: postes.find((poste: Poste) => poste.id === myInscriptionBenevole.find((inscription: MonInscriptionBenevole) => inscription.creneauHoraireID === creneauHoraire.id)?.posteID) ? "bold" : "normal" }}>
+                        {postes.find((poste: Poste) => poste.id === myInscriptionBenevole.find((inscription: MonInscriptionBenevole) => inscription.creneauHoraireID === creneauHoraire.id)?.posteID)?.nom || "Aucun poste"}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            </Paper>
+          }
           <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid" }}>
             <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
               Reference

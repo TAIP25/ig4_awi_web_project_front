@@ -18,9 +18,10 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Divider, Stack } from '@mui/material';
 
 function ResponsiveAppBar() {
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
+
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
