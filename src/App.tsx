@@ -84,9 +84,13 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           { isAdmin && <Route path="/dashboard" element={<Dashboard />} /> }
-          <Route path="/account" element={<Account />} />
-          <Route path="/planning" element={<Planning />} />
-          <Route path="/eventsignup" element={<EventSignup />} />
+          { isAuthenticated &&
+            <>
+              <Route path="/account" element={<Account />} />
+              <Route path="/planning" element={<Planning />} />
+              <Route path="/eventsignup" element={<EventSignup />} />
+            </>       
+          }
           <Route path="*" element={<Error />} />
         </Routes>
       </Box>
