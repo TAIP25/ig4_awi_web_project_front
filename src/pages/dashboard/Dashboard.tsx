@@ -16,6 +16,7 @@ import HandlePoste from './HandlePoste';
 import Festival from '../../interfaces/Festival';
 import FestivalSelect from './FestivalSelect';
 import { Divider } from '@mui/material';
+import ReservationBenevoles from './ReservationBenevoles';
 //import BenevolesBIS from './BenevolesBIS.tsx';
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -125,7 +126,7 @@ export default function Dashboard() {
           {/* Demande de reservation */}
           <Grid item xs={12}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              {/* <ReservationBenevoles/> */}
+              {<ReservationBenevoles/>}
             </Paper>
           </Grid>
           {/* Gestion des postes */}

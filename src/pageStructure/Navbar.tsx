@@ -7,7 +7,6 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
@@ -17,9 +16,8 @@ import { NavLink, Navigate} from "react-router-dom";
 import Cookies from 'js-cookie';
 import {decodeToken} from 'react-jwt';
 import axios from 'axios';
-
-
-
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Stack } from '@mui/material';
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -97,9 +95,6 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            <NavLink to="/">
-              Festival du Jeu
-            </NavLink>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -110,6 +105,12 @@ function ResponsiveAppBar() {
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
               color="inherit"
+              sx={{
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
             >
               <MenuIcon />
             </IconButton>
@@ -136,7 +137,7 @@ function ResponsiveAppBar() {
                   textAlign="center"
                   component="a"
                 >
-                  <NavLink to="/">
+                  <NavLink to="/" style={{color: 'inherit'}}>
                     Accueil
                   </NavLink>
                 </Typography>
@@ -146,7 +147,7 @@ function ResponsiveAppBar() {
                 textAlign="center" 
                 component="a"
                   >
-                    <NavLink to="/planning">
+                    <NavLink to="/planning" style={{color: 'inherit'}}>
                       Calendrier
                     </NavLink>
                   </Typography>
@@ -168,34 +169,55 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            <NavLink to="/">
-              Festival du Jeu
-            </NavLink>
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button
-                key="accueil"
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                <NavLink to="/">
-                  Accueil
-                </NavLink>
-            </Button>
-            <Button
-                key="planning"
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                <NavLink to="/planning">
-                  Planning
-                </NavLink>
-            </Button>
+            <Stack direction="row" spacing={2}>
+              <NavLink to="/" style={{color: 'inherit'}}>
+                <Button 
+                  color="inherit"
+                  sx={{
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                >
+                  <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold'}} >
+                    Accueil
+                  </Typography>
+                </Button>
+              </NavLink>
+              <NavLink to="/planning" style={{color: 'inherit'}}>
+                <Button 
+                  color="inherit"
+                  sx={{
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                >
+                  <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold'}} >
+                    Planning
+                  </Typography>
+                </Button>
+              </NavLink>
+            </Stack>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="User" src="/user-logo.png" />
-              </IconButton>
+              <Button onClick={handleOpenUserMenu} sx={{ color: 'white' }}>
+                <AccountCircleIcon 
+                  fontSize='large' 
+                  sx={{
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                />
+              </Button>
             </Tooltip>
             <Menu
               sx={{ mt: '45px' }}
@@ -216,43 +238,43 @@ function ResponsiveAppBar() {
               {isAuthenticated ? (
                 [
                   <MenuItem key="account" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a">
-                      <NavLink to="/account">
-                          Account
-                      </NavLink>
-                    </Typography>
+                    <NavLink to="/account" style={{color: 'inherit', textDecoration: 'none'}}>
+                      <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold', textDecoration: 'none'}} >
+                        MON COMPTE
+                      </Typography>
+                    </NavLink>
                   </MenuItem>,
                   isAdmin && (
-                    <MenuItem key="dashboard" onClick={handleCloseUserMenu}>
-                      <Typography textAlign="center" component="a">
-                        <NavLink to="/dashboard">
-                          Dashboard
-                        </NavLink>
-                      </Typography>
-                    </MenuItem>),
-                  <MenuItem key="logout" onClick={handleLogout}>
-                    <Typography textAlign="center" component="a">
-                      <NavLink to="/login">
-                        Logout
+                    <MenuItem key="dashboard" onClick={handleCloseUserMenu} sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <NavLink to="/dashboard" style={{color: 'inherit', textDecoration: 'none'}}>
+                        <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold', textDecoration: 'none'}} >
+                          DASHBOARD
+                        </Typography>
                       </NavLink>
-                    </Typography>
+                    </MenuItem>),
+                  <MenuItem key="logout" onClick={handleLogout} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <NavLink to="/login" style={{color: 'inherit', textDecoration: 'none'}}>
+                      <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold', textDecoration: 'none'}} >
+                        DECONNEXION
+                      </Typography>
+                    </NavLink>
                   </MenuItem>,
                 ]
               ) : (
                 [
-                  <MenuItem key="login" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a">
-                      <NavLink to="/login">
-                        Login
-                      </NavLink>
-                    </Typography>
+                  <MenuItem key="login" onClick={handleCloseUserMenu} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <NavLink to="/login" style={{color: 'inherit', textDecoration: 'none'}}>
+                      <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold', textDecoration: 'none'}} >             
+                        CONNNECTION                  
+                      </Typography>
+                    </NavLink>
                   </MenuItem>,
-                  <MenuItem key="register" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a">
-                      <NavLink to="/signup">
-                        Register
-                      </NavLink>
-                    </Typography>
+                  <MenuItem key="register" onClick={handleCloseUserMenu} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <NavLink to="/signup" style={{color: 'inherit', textDecoration: 'none', textAlign: 'center'}}>
+                      <Typography variant='h6' component="a" sx={{color: 'inherit', fontWeight: 'bold', textDecoration: 'none'}} >
+                        INSCRIPTION
+                      </Typography>
+                    </NavLink>
                   </MenuItem>,
                 ]
               )}
