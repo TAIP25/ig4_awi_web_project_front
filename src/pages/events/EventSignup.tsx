@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import {decodeToken} from 'react-jwt';
 import Cookies from 'js-cookie';
 import  Festival  from '../../interfaces/Festival';
+import { Navigate } from "react-router-dom";
 
 const tailleTShirt = [
   {
@@ -69,6 +70,7 @@ export default function EventSignup() {
   const [checked, setChecked] = useState(false);
   const [selectedHebergement, setSelectedHebergement] = useState('');
   const [festival, setFestival] = useState<Festival>();
+  const [isSignupToEvent, setIsSignupToEvent] = useState(false);
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/festival/next`).then((response) => {
@@ -123,7 +125,8 @@ export default function EventSignup() {
           vegetarien: checked,
         }).then((response) => {
           console.log(response);
-          alert("Inscription réussie");
+          //alert("Inscription réussie");
+          setIsSignupToEvent(true);
         }).catch((error) => {
           console.log(error);
           alert(error);
@@ -133,13 +136,16 @@ export default function EventSignup() {
         
         console.log(error);
         alert("Vous êtes déjà inscrit à ce festival")
+        setIsSignupToEvent(true);
         return;
       });
 
-
-      
     }
   };
+
+  if (isSignupToEvent) {
+    return <Navigate to="/planning" />;
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
