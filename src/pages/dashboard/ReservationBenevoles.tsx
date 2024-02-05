@@ -71,9 +71,7 @@
     
           // Récupère tous les créneaux horaires
           await fetchCreneauxHoraires();
-    
-          console.log("Créneaux horaires : " + creneauxHoraires.length);
-          console.log("Réservations de bénévoles : " + reservationBenevoles.length);
+  
 
           // Sélectionner le premier créneau horaire du jour actuel
           const creneauxJourActuel = getCreneauHoraireByDay(selectedDay);
@@ -82,7 +80,6 @@
             setSelectedCreneau(premierCreneauJourActuel.id);
             setReservationToDisplay(reservationBenevoles.filter((reservationBenevole) => reservationBenevole.creneauHoraire.id === premierCreneauJourActuel.id));
           } else {
-            console.log("Pas de créneau pour le jour actuel");
             // S'il n'y a pas de créneau pour le jour actuel, réinitialiser la sélection
             setSelectedCreneau(null);
             setReservationToDisplay([]);
@@ -107,9 +104,8 @@
       axios.get(`${import.meta.env.VITE_API_URL}/inscriptionBenevole/festival/${festival?.id}/reservations`)
         .then(response => {
           setReservationBenevoles(response.data.inscriptions.filter((inscription: any) => inscription.status == "En attente" && inscription.festivalID === festival!.id))
-        })
-        .catch(error => {
-          console.error(error);
+        }).catch(_error => {
+          //console.log("Erreur lors de la récupération des réservations de bénévoles : " + error)
         });
     };
 
@@ -158,8 +154,7 @@
         id: reservationBenevole.id,
         status: "Refusé"
       })
-      .then(response => {
-        console.log(response.data)
+      .then(_response => {
         fetchReservationData();
       })
     }
@@ -172,9 +167,7 @@
         id: reservationBenevole.id,
         status: "Accepté"
       })
-      .then(response => {
-        console.log(response.data)
-
+      .then(_response => {
         // Récupère les autres réservations du bénévole pour le même créneau horaire et le même jour
         const reservationsBenevole = getReservationByCreneauBenevoleFestival(reservationBenevole);
         // Pour chaque réservation, la refuser
