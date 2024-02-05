@@ -26,6 +26,7 @@ export enum Status {
 
 //TODO: refactor code and file
 export default function Planning() {
+
   /* Variables */
   //TODO: handle week if the festival is not on saturday and sunday
   const week: string[] = ["Samedi", "Dimanche"];
@@ -39,6 +40,8 @@ export default function Planning() {
   const [jour, setJour] = useState<string>(week[0]);
   const [refreshTrigger, setRefreshTrigger] = useState<boolean>(false);
   const [dataReady, setDataReady] = useState<boolean>(false);
+  const [animation, setAnimation] = useState<number|null>(null);
+  const [myInscriptionBenevoleAnimation, setMyInscriptionBenevoleAnimation] = useState<MonInscriptionBenevole[]>([]);
 
 
   // Fetch festival data
@@ -69,7 +72,7 @@ export default function Planning() {
     
           const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
           const postes: Poste[] = res2.data.postes;
-
+          
           const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
             const nombreMax: number = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
             const inscriptionBenevole: InscriptionBenevole = {
@@ -80,9 +83,12 @@ export default function Planning() {
             };
             return inscriptionBenevole;
           });
-  
+
           setCreneauxHoraires(creneauxHoraires);
           setPostes(postes);
+          const resAnimation: number = postes.find((poste) => poste.nom === "Animation")!.id;
+          setAnimation(resAnimation);
+
           setInscriptionBenevole(inscriptionBenevoleTemp);
           setDataReady(true);
         } catch (error) {
@@ -91,7 +97,7 @@ export default function Planning() {
       }
       fetchData();
     };
-  }, [festival]);
+  }, [festival, animation]);
 
   // use effect to update progress bars when inscriptionBenevole is updated
   useEffect(() => {
@@ -129,6 +135,7 @@ export default function Planning() {
             return myInscriptionBenevole;
           });
           setMyInscriptionBenevole(myInscriptionBenevoleTemp);
+          setMyInscriptionBenevoleAnimation(myInscriptionBenevoleTemp.filter((inscription) => inscription.posteID === animation));
         } catch (error) {
           console.error(error);
         } finally {
@@ -137,7 +144,7 @@ export default function Planning() {
       };
       fetchData();
     }
-  }, [refreshTrigger, festival]);
+  }, [refreshTrigger, festival, animation]);
 
   /* Functions */
   function getCreneauHoraireByDay(day: string): CreneauHoraire[] {
@@ -386,7 +393,9 @@ export default function Planning() {
             ))}
             </Stack>
           </Paper>
-          <Animation getCreneauHoraireByDay={getCreneauHoraireByDay} jour={jour} />
+          { festival && myInscriptionBenevole.find((inscription) => (inscription.status === "Accepté" || inscription.status === "En attente") && inscription.posteID === animation) && myInscriptionBenevoleAnimation.length !== 0 &&
+            <Animation getCreneauHoraireByDay={getCreneauHoraireByDay} jour={jour} festival={festival} setRefreshTrigger={setRefreshTrigger} myInscriptionBenevoleAnimation={myInscriptionBenevoleAnimation} />
+          }
         </Stack>
     </Box>
   );

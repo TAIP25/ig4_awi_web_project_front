@@ -15,6 +15,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Account from "./pages/account/Account";
 import Planning from "./pages/planning/Planning";
 import EventSignup from "./pages/events/EventSignup";
+import Error from "./pages/error/Error";
 
 const theme = createTheme({
   palette: {
@@ -50,10 +51,11 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard/*" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/account" element={<Account />} />
           <Route path="/planning" element={<Planning />} />
           <Route path="/eventsignup" element={<EventSignup />} />
+          <Route path="*" element={<Error />} />
         </Routes>
       </Box>
     </ThemeProvider>
