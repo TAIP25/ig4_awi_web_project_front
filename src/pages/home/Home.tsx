@@ -1,7 +1,14 @@
 import { Box, Paper, Stack, Typography } from "@mui/material"
 
 import Switch from "../planning/Switch"
-import React from "react"
+import React, { useEffect, useState } from "react"
+import MonInscriptionBenevole from "../../interfaces/MonInscriptionBenevole"
+import Festival from "../../interfaces/Festival"
+import axios from "axios"
+import { decodeToken } from "react-jwt"
+import Cookies from 'js-cookie';
+import CreneauHoraire from "../../interfaces/CreneauHoraire"
+import Poste from "../../interfaces/Poste"
 //import "./Home.scss"
 
 const NEWS = [
@@ -43,19 +50,6 @@ const REFERENTS = [
   }
 ]
 
-const PLANNING = [
-  {
-    id: 1,
-    title: "8h - 9h",
-    content: "Content 1"
-  },
-  {
-    id: 2,
-    title: "9h - 10h",
-    content: "Content 2"
-  }
-]
-
 
 export default function Home(){
   /* Variables */
@@ -63,7 +57,77 @@ export default function Home(){
   //Refactor with planning component
   const week: string[] = ["Samedi", "Dimanche"];
 
+  /* UseState */
   const [jour, setJour] = React.useState(week[0]);
+  const [myInscriptionBenevole, setMyInscriptionBenevole] = React.useState<MonInscriptionBenevole[]>([]);
+  const [creneauxHoraires, setCreneauxHoraires] = useState<CreneauHoraire[]>([]);
+  const [postes, setPostes] = useState<Poste[]>([]);
+  const [festival, setFestival] = React.useState<Festival | null>(null);
+
+  /* UseEffect */
+  // Fetch festival data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/festival/next`);
+        const festival: Festival = res.data;
+        setFestival(festival);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      if(festival === null) return;
+      try {
+        const benevoleID: number = getCookiesBenevoleID();
+        const [res1, res2, res3] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival!.id}/benevole/${benevoleID}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festival?.id}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire`)
+        ]);
+
+        const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
+        const postes: Poste[] = res2.data.postes;
+
+        let myInscriptionBenevoleTemp: MonInscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+          const myInscriptionBenevole: MonInscriptionBenevole = {
+            id: inscription.id,
+            creneauHoraireID: inscription.creneauHoraireID,
+            posteID: inscription.posteID,
+            status: inscription.status,
+          };
+          return myInscriptionBenevole;
+        });
+
+        // Filter que les inscriptions Accepté
+        myInscriptionBenevoleTemp = myInscriptionBenevoleTemp.filter((inscription: MonInscriptionBenevole) => inscription.status === "Accepté");
+
+        setMyInscriptionBenevole(myInscriptionBenevoleTemp);
+        setCreneauxHoraires(creneauxHoraires);
+        setPostes(postes);
+        
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchData();
+  }, [festival]);
+
+  /* Functions */
+  function getCookiesBenevoleID() {
+    const decodedToken: any = decodeToken(Cookies.get('token')!)
+    const benevoleID: number = decodedToken.id_benevole
+    return benevoleID
+  }
+
+  function getCreneauHoraireByDay(day: string): CreneauHoraire[] {
+    return creneauxHoraires.filter((creneauHoraire) => creneauHoraire.jour === day)
+  }
 
   return(
     <Box
@@ -94,20 +158,22 @@ export default function Home(){
       </Typography>
       <Stack spacing={10} direction="row" sx={{ p: 10, marginLeft: '3rem', marginRight: '3rem' }}>
         <Stack spacing={2} sx={{ width: "100%" }}>
+        <Switch week={week} setJour={setJour} jour={jour} sx={{ alignSelf: "flex-start" }} />
           <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid" }}>
             <Typography variant="h6" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
               Planning
             </Typography>
-            <Switch week={week} setJour={setJour} jour={jour} sx={{ alignSelf: "flex-start" }} />
-            <Stack spacing={2} direction="row">
-              {PLANNING.map((planning) => (
-                <Paper key={planning.id} sx={{ p: 2, borderColor: "primary.main", borderWidth: "2px", borderStyle: "solid" }}>
+            <Stack spacing={2} direction="row" sx={{ justifyContent: "center" }}>
+              {getCreneauHoraireByDay(jour).map((creneauHoraire) => (
+                <Paper key={creneauHoraire.id} sx={{ p: 2, borderColor: "primary.main", borderWidth: "2px", borderStyle: "solid" }}>
                   <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-                    {planning.title}
+                    {creneauHoraire.heureDebut}h - {creneauHoraire.heureFin}h
                   </Typography>
-                  <Typography variant="body1" component="div" display={"flex"} justifyContent={"center"}>
-                    {planning.content}
-                  </Typography>
+                  <Stack spacing={2}>
+                    <Typography variant="body1" component="div" display={"flex"} justifyContent={"center"} sx={{ fontWeight: postes.find((poste: Poste) => poste.id === myInscriptionBenevole.find((inscription: MonInscriptionBenevole) => inscription.creneauHoraireID === creneauHoraire.id)?.posteID) ? "bold" : "normal" }}>
+                      {postes.find((poste: Poste) => poste.id === myInscriptionBenevole.find((inscription: MonInscriptionBenevole) => inscription.creneauHoraireID === creneauHoraire.id)?.posteID)?.nom || "Aucun poste"}
+                    </Typography>
+                  </Stack>
                 </Paper>
               ))}
             </Stack>
@@ -131,13 +197,13 @@ export default function Home(){
           </Paper>
         </Stack>
         <Stack spacing={2} sx={{ width: "35%" }}>
-          <Paper sx={{ p: 2, backgroundColor: "secondary.main" }}>
+          <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid"}}>
             <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
               News
             </Typography>
             <Stack spacing={2}>
               {NEWS.map((news) => (
-                <Paper key={news.id} sx={{ p: 2, backgroundColor: "primary.main" }}>
+                <Paper key={news.id} sx={{ p: 2, borderColor: "primary.main", borderWidth: "2px", borderStyle: "solid" }}>
                   <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
                     {news.title}
                   </Typography>
@@ -148,13 +214,13 @@ export default function Home(){
               ))}
             </Stack>
           </Paper>
-          <Paper sx={{ p: 2, backgroundColor: "secondary.main" }}>
+          <Paper sx={{ p: 2, borderColor: "secondary.main", borderWidth: "2px", borderStyle: "solid" }}>
             <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
               Soirée
             </Typography>
             <Stack spacing={2}>
               {EVENTS.map((event) => (
-                <Paper key={event.id} sx={{ p: 2, backgroundColor: "primary.main" }}>
+                <Paper key={event.id} sx={{ p: 2, borderColor: "primary.main", borderWidth: "2px", borderStyle: "solid" }}>
                   <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
                     {event.title}
                   </Typography>
