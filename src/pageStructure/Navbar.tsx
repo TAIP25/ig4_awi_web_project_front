@@ -11,32 +11,22 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AuthContext from "../context/AuthProvider";
-import { useContext, useEffect } from "react";
-import { Navigate} from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { NavLink, Navigate} from "react-router-dom";
 import Cookies from 'js-cookie';
+import {decodeToken} from 'react-jwt';
+import axios from 'axios';
 
 
-const pages = ['Accueil', 'Calendrier'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#888888',
-    },
-    secondary: {
-      main: '#FF0000',
-    },
-  }
-});
 
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const {isAuthenticated, setIsAuthenticated} = useContext(AuthContext);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -64,8 +54,24 @@ function ResponsiveAppBar() {
   useEffect(() => {
     if (Cookies.get('token') != null) {
       setIsAuthenticated(true);
-    }
 
+      // On récupère l'id du membre dans le token
+      const token = Cookies.get('token');
+
+      if (token != null) {
+        const decodedToken: any = decodeToken(token);
+        const id = decodedToken.id_benevole;
+        axios.get(`${import.meta.env.VITE_API_URL}/benevole/${id}`)
+        .then((response) => {
+          if (response.data.statut === "Admin") {
+            setIsAdmin(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      }   
+    }
   }, [isAuthenticated]);
 
   return (
@@ -81,7 +87,6 @@ function ResponsiveAppBar() {
             variant="h6"
             noWrap
             component="a"
-            href="/"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -92,7 +97,9 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            Festival du Jeu
+            <NavLink to="/">
+              Festival du Jeu
+            </NavLink>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -128,18 +135,20 @@ function ResponsiveAppBar() {
                 <Typography 
                   textAlign="center"
                   component="a"
-                  href='/'
                 >
-                  Accueil
+                  <NavLink to="/">
+                    Accueil
+                  </NavLink>
                 </Typography>
                 </MenuItem>
               <MenuItem key="calendrier" onClick={handleCloseNavMenu} >
                 <Typography 
                 textAlign="center" 
                 component="a"
-                href='/planning'
                   >
-                  Calendrier
+                    <NavLink to="/planning">
+                      Calendrier
+                    </NavLink>
                   </Typography>
               </MenuItem>
             </Menu>
@@ -148,7 +157,6 @@ function ResponsiveAppBar() {
             variant="h5"
             noWrap
             component="a"
-            href="/"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -160,22 +168,26 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            Festival du Jeu
+            <NavLink to="/">
+              Festival du Jeu
+            </NavLink>
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             <Button
                 key="accueil"
-                href='/'
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                Accueil
+                <NavLink to="/">
+                  Accueil
+                </NavLink>
             </Button>
             <Button
                 key="planning"
-                href='/planning'
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                Calendrier
+                <NavLink to="/planning">
+                  Planning
+                </NavLink>
             </Button>
           </Box>
 
@@ -204,26 +216,42 @@ function ResponsiveAppBar() {
               {isAuthenticated ? (
                 [
                   <MenuItem key="account" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a" href="/account">
-                      Account
+                    <Typography textAlign="center" component="a">
+                      <NavLink to="/account">
+                          Account
+                      </NavLink>
                     </Typography>
                   </MenuItem>,
+                  isAdmin && (
+                    <MenuItem key="dashboard" onClick={handleCloseUserMenu}>
+                      <Typography textAlign="center" component="a">
+                        <NavLink to="/dashboard">
+                          Dashboard
+                        </NavLink>
+                      </Typography>
+                    </MenuItem>),
                   <MenuItem key="logout" onClick={handleLogout}>
-                    <Typography textAlign="center" component="a" href="/login">
-                      Logout
+                    <Typography textAlign="center" component="a">
+                      <NavLink to="/login">
+                        Logout
+                      </NavLink>
                     </Typography>
                   </MenuItem>,
                 ]
               ) : (
                 [
                   <MenuItem key="login" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a" href="/login">
-                      Login
+                    <Typography textAlign="center" component="a">
+                      <NavLink to="/login">
+                        Login
+                      </NavLink>
                     </Typography>
                   </MenuItem>,
                   <MenuItem key="register" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center" component="a" href="/signup">
-                      Register
+                    <Typography textAlign="center" component="a">
+                      <NavLink to="/signup">
+                        Register
+                      </NavLink>
                     </Typography>
                   </MenuItem>,
                 ]

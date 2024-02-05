@@ -5,51 +5,49 @@ import Cookies from 'js-cookie';
 
 import CreneauHoraire from "../../interfaces/CreneauHoraire";
 import Poste from "../../interfaces/Poste";
+import Festival from "../../interfaces/Festival";
 import { decodeToken } from "react-jwt";
 import InscriptionBenevole from "../../interfaces/InscriptionBenevole";
+import Item from "./Item";
+import MonInscriptionBenevole from "../../interfaces/MonInscriptionBenevole";
+import Switch from "./Switch";
+import Animation from "./Animation";
+
+// Enum with the different status of an inscription
+export enum Status {
+  Accepte, // If the inscription is accepted
+  AcceptationEffectif, // If the inscription of one post in the same creneauHoraire is accepted
+  EnAttente, // If the inscription is waiting for an answer
+  Refuse, // If the inscription is refused
+  Plein, // If the inscription is full
+  NonInscrit, // If the user is not inscribed
+}
+
 
 //TODO: refactor code and file
 export default function Planning() {
   /* Variables */
-  //TODO: handle festivalID
-  const festivalID = 1;
+  //TODO: handle week if the festival is not on saturday and sunday
+  const week: string[] = ["Samedi", "Dimanche"];
 
   /* UseState */
+  const [festival, setFestival] =  useState<Festival | null>(null);
   const [creneauxHoraires, setCreneauxHoraires] = useState<CreneauHoraire[]>([]);
   const [postes, setPostes] = useState<Poste[]>([]);
   const [inscriptionBenevole, setInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
-  //TODO: handle myInscriptionBenevole
-  const [myInscriptionBenevole, setMyInscriptionBenevole] = useState<InscriptionBenevole[]>([]);
-  const [jour, setJour] = useState<string>("Samedi");
+  const [myInscriptionBenevole, setMyInscriptionBenevole] = useState<MonInscriptionBenevole[]>([]);
+  const [jour, setJour] = useState<string>(week[0]);
+  const [refreshTrigger, setRefreshTrigger] = useState<boolean>(false);
+  const [dataReady, setDataReady] = useState<boolean>(false);
 
-  /* UseEffect */
+
+  // Fetch festival data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [res1, res2, res3] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`),
-          axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festivalID}`),
-          axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire`),
-        ]);
-  
-        const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
-        
-        const postes: Poste[] = res2.data.poste;
-
-        const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
-          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
-          const inscriptionBenevole: InscriptionBenevole = {
-            creneauHoraireID: inscription.creneauHoraireID,
-            posteID: inscription.posteID,
-            nombreInscrits: inscription._count.id,
-            nombreMax: nombreMax,
-          };
-          return inscriptionBenevole;
-        });
-
-        setCreneauxHoraires(creneauxHoraires);
-        setPostes(postes);
-        setInscriptionBenevole(inscriptionBenevoleTemp);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/festival/next`);
+        const festival: Festival = res.data;
+        setFestival(festival);
       } catch (error) {
         console.error(error);
       }
@@ -58,39 +56,91 @@ export default function Planning() {
     fetchData();
   }, []);
 
+  /* UseEffect */
+  useEffect(() => {
+    if(festival){
+      const fetchData = async () => {
+        try {
+          const [res1, res2, res3] = await Promise.all([
+            axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival?.id}/count`),
+            axios.get(`${import.meta.env.VITE_API_URL}/poste/festival/${festival?.id}`),
+            axios.get(`${import.meta.env.VITE_API_URL}/creneauHoraire`),
+          ]);
+    
+          const creneauxHoraires: CreneauHoraire[] = res3.data.creneauHoraire;
+          const postes: Poste[] = res2.data.postes;
+
+          const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+            const nombreMax: number = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+            const inscriptionBenevole: InscriptionBenevole = {
+              creneauHoraireID: inscription.creneauHoraireID,
+              posteID: inscription.posteID,
+              nombreInscrits: inscription._count.id,
+              nombreMax: nombreMax,
+            };
+            return inscriptionBenevole;
+          });
+  
+          setCreneauxHoraires(creneauxHoraires);
+          setPostes(postes);
+          setInscriptionBenevole(inscriptionBenevoleTemp);
+          setDataReady(true);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      fetchData();
+    };
+  }, [festival]);
+
   // use effect to update progress bars when inscriptionBenevole is updated
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const benevoleID: number = getCookiesBenevoleID();
-        const [res1, res2] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`),
-          axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/benevole/${benevoleID}`),
-        ]);
+    if(festival){
+      const fetchData = async () => {
+        try {
+          const benevoleID: number = getCookiesBenevoleID();
+          const [res1, res2] = await Promise.all([
+            axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival!.id}/count`),
+            axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festival!.id}/benevole/${benevoleID}`),
+          ]);
+          
+          const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
+            const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
+            const inscriptionBenevole: InscriptionBenevole = {
+              creneauHoraireID: inscription.creneauHoraireID,
+              posteID: inscription.posteID,
+              nombreInscrits: inscription._count.id,
+              nombreMax: nombreMax,
+            };
+            return inscriptionBenevole;
+          });
 
-        const inscriptionBenevoleTemp: InscriptionBenevole[] = res1.data.inscription.map((inscription: any) => {
-          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
-          const inscriptionBenevole: InscriptionBenevole = {
-            creneauHoraireID: inscription.creneauHoraireID,
-            posteID: inscription.posteID,
-            nombreInscrits: inscription._count.id,
-            nombreMax: nombreMax,
-          };
-          return inscriptionBenevole;
-        });
-        if(inscriptionBenevoleTemp !== inscriptionBenevole) {
-          setInscriptionBenevole(inscriptionBenevoleTemp);
+          if(postes.length !== 0) {
+            setInscriptionBenevole(inscriptionBenevoleTemp);
+          }
+
+          const myInscriptionBenevoleTemp: MonInscriptionBenevole[] = res2.data.inscription.map((inscription: any) => {
+            const myInscriptionBenevole: MonInscriptionBenevole = {
+              id: inscription.id,
+              creneauHoraireID: inscription.creneauHoraireID,
+              posteID: inscription.posteID,
+              status: inscription.status,
+            };
+            return myInscriptionBenevole;
+          });
+          setMyInscriptionBenevole(myInscriptionBenevoleTemp);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setRefreshTrigger(false)
         }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-  
-    fetchData();
-  }, [inscriptionBenevole]);
+      };
+      fetchData();
+    }
+  }, [refreshTrigger, festival]);
 
   /* Functions */
-  function getCreneauHoraireByDay(day: string) {
+  function getCreneauHoraireByDay(day: string): CreneauHoraire[] {
     return creneauxHoraires.filter((creneauHoraire) => creneauHoraire.jour === day)
   }
 
@@ -100,42 +150,47 @@ export default function Planning() {
     return benevoleID
   }
 
-  function reserver(creneauHoraire: CreneauHoraire, poste: Poste) {
-    console.log("Réserver: " + creneauHoraire.jour + " " + creneauHoraire.heureDebut + "h - " + creneauHoraire.heureFin + "h" + " " + poste.nom)
-    handleReservation(creneauHoraire, poste, festivalID, getCookiesBenevoleID())
+  async function reserver(creneauHoraire: CreneauHoraire, poste: Poste) {
+    await handleReservation(creneauHoraire, poste, festival!.id, getCookiesBenevoleID())
+    setRefreshTrigger(true)
+  }
+
+  async function annuler(creneauHoraire: CreneauHoraire, poste: Poste) {
+    await handleAnnulation(creneauHoraire, poste, festival!.id, getCookiesBenevoleID())
+    setRefreshTrigger(true)
   }
 
   async function handleReservation(creneauHoraire: CreneauHoraire, poste: Poste, festival: number, benevole: number) {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/inscriptionBenevole`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/inscriptionBenevole`, {
         benevoleID: benevole,
         festivalID: festival,
         creneauHoraireID: creneauHoraire.id,
         posteID: poste.id,
       })
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-      if(res.status === 200) {
-        const countRes = await axios.get(`${import.meta.env.VITE_API_URL}/inscriptionbenevole/festival/${festivalID}/count`)
-        
-        const inscriptionBenevoleTemp: InscriptionBenevole[] = countRes.data.inscription.map((inscription: any) => {
-          const nombreMax: any = postes.find((poste) => poste.id === inscription.posteID)?.nombreBenevoles || 1
-          const inscriptionBenevole: InscriptionBenevole = {
-            creneauHoraireID: inscription.creneauHoraireID,
-            posteID: inscription.posteID,
-            nombreInscrits: inscription._count.id,
-            nombreMax: nombreMax,
-          };
-          return inscriptionBenevole;
-        });
-        setInscriptionBenevole(inscriptionBenevoleTemp);
-      }
-
+  async function handleAnnulation(creneauHoraire: CreneauHoraire, poste: Poste, festival: number, benevole: number) {
+    try {
+      const deleteInscriptionID = myInscriptionBenevole.find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
+      await axios.delete(`${import.meta.env.VITE_API_URL}/inscriptionBenevole/${deleteInscriptionID?.id}`, {
+        data: {
+          benevoleID: benevole,
+          festivalID: festival,
+          creneauHoraireID: creneauHoraire.id,
+          posteID: poste.id,
+        }
+      })
     } catch (error) {
       console.error(error);
     }
   }
 
   function handleProgressBars(poste: Poste, creneauHoraire: CreneauHoraire) {
+    
     const inscriptionBenevoleSpe: InscriptionBenevole | undefined = inscriptionBenevole.find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
     if(inscriptionBenevoleSpe === undefined) {
       return 0
@@ -148,86 +203,191 @@ export default function Planning() {
     }
   }
 
+  function handleStatus(poste: Poste, creneauHoraire: CreneauHoraire): Status {
+    const inscriptionBenevoleSpe: InscriptionBenevole | undefined = inscriptionBenevole
+      .find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
+    
+    const myInscriptionBenevoleSpe: MonInscriptionBenevole | undefined = myInscriptionBenevole
+      .find((inscription) => inscription.posteID === poste.id && inscription.creneauHoraireID === creneauHoraire.id)
+    
+    const myInscriptionBenevoleSpe2: MonInscriptionBenevole | undefined = myInscriptionBenevole
+      .filter((inscription) => inscription.posteID !== poste.id && inscription.creneauHoraireID === creneauHoraire.id)
+      .find((inscription) => inscription.status === "Accepté")
+
+    if(myInscriptionBenevoleSpe2 !== undefined) {
+      return Status.AcceptationEffectif
+    }
+
+    if(myInscriptionBenevoleSpe !== undefined) {
+      if(myInscriptionBenevoleSpe.status === "Accepté") {
+        return Status.Accepte
+      } else if(myInscriptionBenevoleSpe.status === "En attente") {
+        return Status.EnAttente
+      } else if (myInscriptionBenevoleSpe.status === "Refusé") {
+        return Status.Refuse
+      }
+    } else {
+      if(inscriptionBenevoleSpe !== undefined) {
+        if(inscriptionBenevoleSpe.nombreInscrits === inscriptionBenevoleSpe.nombreMax) {
+          return Status.Plein
+        } else {
+          return Status.NonInscrit
+        }
+      }
+    }
+    return Status.NonInscrit
+  }
+
+  function handleItem(status: Status, poste: Poste, creneauHoraire: CreneauHoraire) {
+    const customStyle = {
+      width: "100%",
+      height: "55px",
+      color: "white",
+      display: "flex", 
+      justifyContent: "center", 
+      alignItems: "center"
+    }
+    switch(status) {
+      case Status.Accepte:
+        return (
+          <Paper key={creneauHoraire.id} sx={{...customStyle, backgroundColor: `success.main`}}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              ACCEPTÉ
+            </Typography>
+          </Paper>
+        )
+      case Status.AcceptationEffectif:
+        return (
+          <Paper key={creneauHoraire.id} sx={{...customStyle, backgroundColor: `gray`}} />
+        )
+      case Status.EnAttente:
+        return (
+          <Paper key={creneauHoraire.id} sx={{...customStyle, backgroundColor: `warning.main`}}>
+              <Button
+                variant="contained" 
+                color="warning"
+                sx={{ margin: 'auto', width: "100%", height: "100%" }} 
+                onClick={() => {annuler(creneauHoraire, poste)}}
+              >
+                <Typography variant="h6" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
+                  EN ATTENTE
+                </Typography>
+              </Button>
+          </Paper>
+        )
+      case Status.Refuse:
+        return (
+          <Paper key={creneauHoraire.id} sx={{...customStyle, backgroundColor: `error.main`}}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              REFUSÉ
+            </Typography>
+          </Paper>
+        )
+      case Status.Plein:
+        return (
+          <Paper key={creneauHoraire.id} sx={{...customStyle, backgroundColor: `gray`}}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              PLEIN
+            </Typography>
+          </Paper>
+        )
+      case Status.NonInscrit:
+        return (
+          <Paper key={creneauHoraire.id} sx={{...customStyle, backgroundColor: `secondary.main`}}>
+            <Button 
+              variant="contained" 
+              color="secondary"
+              sx={{ margin: 'auto', width: "100%", height: "100%" }} 
+              onClick={() => {reserver(creneauHoraire, poste)}}
+            >
+              <Stack>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
+                  Réserver
+                </Typography>
+                <Box sx={{ width: '100%' }}>
+                  { dataReady && <LinearProgress variant="determinate" value={handleProgressBars(poste, creneauHoraire)} color="warning" /> }
+                </Box>
+              </Stack>
+            </Button>
+          </Paper>
+        )
+      default:
+        return (
+          <Paper key={creneauHoraire.id} sx={{ width: "100%", color: "white", backgroundColor: `secondary.main`, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Button 
+              variant="contained" 
+              color="secondary"
+              sx={{ margin: 'auto', width: "100%", height: "100%" }} 
+              onClick={() => {reserver(creneauHoraire, poste)}}
+            >
+              <Stack>
+                <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
+                  Réserver
+                </Typography>
+                <Box sx={{ width: '100%' }}>
+                  { dataReady && <LinearProgress variant="determinate" value={handleProgressBars(poste, creneauHoraire)} color="warning" /> }
+                </Box>
+              </Stack>
+            </Button>
+          </Paper>
+        )
+    }
+  }
+
   return (
     <Box
-    component="main"
-    sx={{
-      backgroundColor: (theme) =>
-        theme.palette.mode === 'light'
-          ? theme.palette.grey[100]
-          : theme.palette.grey[900],
-      flexGrow: 1,
-      height: '100vh',
-      overflow: 'auto',
-    }}
+      component="main"
+      sx={{
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'light'
+            ? theme.palette.grey[100]
+            : theme.palette.grey[900],
+        flexGrow: 1,
+        height: '100vh',
+        overflow: 'auto',
+      }}
     >
       <Typography 
-      variant="h1"
-      component="div"
-      display={"flex"}
-      alignItems={"center"}
-      justifyContent={"center"}
-      sx={{
-        p: 2,
-        fontWeight: "bold",
-        fontSize: "4rem",
-      }}
+        variant="h1"
+        component="div"
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        sx={{
+          p: 2,
+          fontWeight: "bold",
+          fontSize: "4rem",
+        }}
       >
-        Planning
+        Planning du festival édition {festival?.edition}
       </Typography>
-      <Paper sx={{ p: 2, marginLeft: '3rem', marginRight: '3rem', marginBottom: '1rem', flexGrow: 1, width: "15%", minWidth: "200px" }}>
-        <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="secondary" sx={{ width: "100%", height: "100%" }} onClick={() => {setJour("Samedi")}} disabled={jour === "Samedi"}>
-            <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-              Samedi
-            </Typography>
-          </Button>
-          <Button variant="contained" color="secondary" sx={{ width: "100%", height: "100%" }} onClick={() => {setJour("Dimanche")}} disabled={jour === "Dimanche"}>
-            <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-              Dimanche
-            </Typography>
-          </Button>
-        </Stack>
-      </Paper>
-      <Paper sx={{ p: 2, marginLeft: '3rem', marginRight: '3rem' }}>
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={2} key={0}>
-            <Paper sx={{ margin: 'auto', flexGrow: 1, width: "100%", backgroundColor: "secondary.main" }}/>
-            {getCreneauHoraireByDay(jour)
-            .map((creneauHoraire) => (
-              <Paper key={creneauHoraire.id} sx={{ margin: 'auto', flexGrow: 1, width: "100%", color: "white", backgroundColor: "primary.main" }}>
-                <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-                  {creneauHoraire.heureDebut}h - {creneauHoraire.heureFin}h
-                </Typography>
-              </Paper>
-            ))}
-          </Stack>
-          {postes.map((poste) => (
-            <Stack direction="row" spacing={2} key={poste.id}>
-              <Paper sx={{ margin: 'auto', flexGrow: 1, width: "100%", color: "white", backgroundColor: "primary.main", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
-                  {poste.nom}
-                </Typography>
-              </Paper>
+      <Switch week={week} setJour={setJour} jour={jour} />
+        <Stack spacing={2} sx={{ marginLeft: '3rem', marginRight: '3rem' }}>
+          <Paper sx={{ p:2, marginLeft: '3rem', marginRight: '3rem', backgroundColor: "white" }}>
+            <Stack spacing={2}>
+            <Stack direction="row" spacing={2} key={0}>
+              <Item color="secondary" title={undefined} />
               {getCreneauHoraireByDay(jour)
               .map((creneauHoraire) => (
-                <Paper key={creneauHoraire.id} sx={{ margin: 'auto', flexGrow: 1, width: "100%"}}>
-                  <Button variant="contained" color="secondary" sx={{ width: "100%", height: "100%" }} onClick={() => {reserver(creneauHoraire, poste)}}>
-                    <Stack>
-                      <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }} display={"flex"} justifyContent={"center"}>
-                        Réserver
-                      </Typography>
-                      <Box sx={{ width: '100%' }}>
-                        <LinearProgress variant="determinate" value={handleProgressBars(poste, creneauHoraire)} color="warning" />
-                      </Box>
-                    </Stack>
-                  </Button>
-                </Paper>
+                <Item key={creneauHoraire.id} color="primary" title={`${creneauHoraire.heureDebut}h - ${creneauHoraire.heureFin}h`} fontColor="white" />
               ))}
             </Stack>
-          ))}
+            {postes.map((poste) => (
+              <Stack direction="row" spacing={2} key={poste.id}>
+                <Item color="primary" title={poste.nom} fontColor="white" />
+                {getCreneauHoraireByDay(jour)
+                .map((creneauHoraire) => {
+                  const status: Status = handleStatus(poste, creneauHoraire)
+                  return (
+                    handleItem(status, poste, creneauHoraire)
+                  )
+                })}
+              </Stack>
+            ))}
+            </Stack>
+          </Paper>
+          <Animation getCreneauHoraireByDay={getCreneauHoraireByDay} jour={jour} />
         </Stack>
-      </Paper>
     </Box>
   );
 }

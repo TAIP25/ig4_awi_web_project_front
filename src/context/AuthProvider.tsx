@@ -1,8 +1,8 @@
 import { createContext, useState } from "react";
 
-type Props = {
+/* type Props = {
     children?: React.ReactNode;
-};
+}; */
 
 
 type IAuthContext = {

@@ -1,5 +1,4 @@
 /* React */
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 /* MUI */
@@ -17,11 +16,6 @@ import Account from "./pages/account/Account";
 import Planning from "./pages/planning/Planning";
 import EventSignup from "./pages/events/EventSignup";
 
-import { Palette } from "@mui/icons-material";
-
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
-
 const theme = createTheme({
   palette: {
     primary: {
@@ -33,6 +27,9 @@ const theme = createTheme({
       main: '#4C5CC5',
       light: '#9DABE2',
       dark: '#002663',
+    },
+    background: {
+      default: '#1D1E26',
     },
     error: {
       main: '#FF0000',
